@@ -15,7 +15,7 @@ int main() {
     eth.init(); //Use DHCP
     eth.connect();
     printf("UDP client IP Address is %s\n", eth.getIPAddress());
-
+#if 0
     UDPSocket sock;
     sock.init();
 
@@ -44,6 +44,7 @@ int main() {
         }
     }
     sock.close();
+#endif
     eth.disconnect();
     notify_completion(result);
     return 0;
