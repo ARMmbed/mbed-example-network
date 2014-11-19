@@ -2,16 +2,17 @@
 #include "EthernetInterface.h"
 #include "test_env.h"
 
-namespace {
-    const char *HTTP_SERVER_NAME = "utcnist.colorado.edu";
-    const int HTTP_SERVER_PORT = 37;
-    const float YEARS_TO_PASS = 114.0;
-}
+// namespace {
+//     const char *HTTP_SERVER_NAME = "utcnist.colorado.edu";
+//     const int HTTP_SERVER_PORT = 37;
+//     const float YEARS_TO_PASS = 114.0;
+// }
 
 
 int main() {
     bool result = false;
     EthernetInterface eth;
+    printf("Starting.\r\n");
     eth.init(); //Use DHCP
     eth.connect();
     printf("UDP client IP Address is %s\n", eth.getIPAddress());
