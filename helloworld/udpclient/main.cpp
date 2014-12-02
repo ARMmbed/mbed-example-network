@@ -71,6 +71,9 @@ protected:
     buffer_t outBuf;
     volatile char rxBuf[32];
     char txBuf[32];
+
+    // These should not be CThunk.  We will remove CThunk from this class once
+    // we decide on the function pointer format we will use for event handlers
     CThunk<UDPGetTime> _default_irq;
     CThunk<UDPGetTime> _send_irq;
     CThunk<UDPGetTime> _recv_irq;
