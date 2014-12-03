@@ -17,8 +17,13 @@ using std::memcpy;
 class UDPGetTime {
 public:
     UDPGetTime() :
-            sock(_default_irq.entry() ), txBuf("foo"), _udpTimePort(UDP_TIME_PORT)
+                    sock((handler_t) _default_irq.entry()),
+                    _udpTimePort(UDP_TIME_PORT),
+                    _default_irq(this),
+                    _recv_irq(this),
+                    _send_irq(this)
     {
+        strcpy(txBuf,"foo");
         inBuf.buffer = rxBuf;
         inBuf.length = sizeof(rxBuf);
         inBuf.pos    = 0;
@@ -26,14 +31,15 @@ public:
         outBuf.length = sizeof(txBuf);
         outBuf.pos    = 0;
 
-        _default_irq.callback(&defaultHandler);
-        _send_irq.callback(&sendHandler);
-        _recv_irq.callback(&recvHandler);
+        _default_irq.callback(&UDPGetTime::defaultHandler);
+        _send_irq.callback(&UDPGetTime::sendHandler);
+        _recv_irq.callback(&UDPGetTime::recvHandler);
 
     }
-    uint32_t getTime(char *address) {
+    uint32_t getTime(const char *address) {
         ip_addr_t addr;
-        if (!ipaddr_aton(HTTP_SERVER_NAME,addr)) {
+        // TODO: add abstracted address functions
+        if (!ipaddr_aton(HTTP_SERVER_NAME,&addr)) {
             defaultHandler(0);
             return 0;
         }
@@ -41,8 +47,10 @@ public:
         received = false;
         // Zero the buffer memory
         memset(inBuf.buffer,0,inBuf.length);
-        sock.start_recv(inBuf, 0, _recv_irq.entry());
-        sock.start_send_to(addr,  outBuf, 0, _send_irq.entry());
+        handler_t rxh = (handler_t)_recv_irq.entry();
+        sock.start_recv(&inBuf, 0, rxh);
+        handler_t txh = (handler_t)_send_irq.entry();
+        sock.start_send_to((struct socket_addr *)&addr, _udpTimePort, &outBuf, 0, txh);
         while(!received) { __WFI(); }
 
         uint32_t time;
@@ -69,17 +77,18 @@ protected:
 protected:
     buffer_t inBuf;
     buffer_t outBuf;
-    volatile char rxBuf[32];
+    char rxBuf[32];
     char txBuf[32];
 
     // These should not be CThunk.  We will remove CThunk from this class once
     // we decide on the function pointer format we will use for event handlers
     CThunk<UDPGetTime> _default_irq;
-    CThunk<UDPGetTime> _send_irq;
     CThunk<UDPGetTime> _recv_irq;
+    CThunk<UDPGetTime> _send_irq;
 };
 
 int main() {
+    bool result = 0;
     EthernetInterface eth;
     printf("Starting.\r\n");
     eth.init(); //Use DHCP
@@ -91,8 +100,8 @@ int main() {
 
 
     const float years = timeRes / 60.0 / 60.0 / 24.0 / 365;
-    printf("UDP: Received %d bytes from server %s on port %d\r\n", n, remote.get_address(), remote.get_port());
-    printf("UDP: %u seconds since 01/01/1900 00:00 GMT ... %s\r\n", timeRes, timeRes > 0 ? "[OK]" : "[FAIL]");
+    //printf("UDP: Received %d bytes from server %s on port %d\r\n", n, remote.get_address(), remote.get_port());
+    printf("UDP: %lu seconds since 01/01/1900 00:00 GMT ... %s\r\n", timeRes, timeRes > 0 ? "[OK]" : "[FAIL]");
     printf("UDP: %.2f years since 01/01/1900 00:00 GMT ... %s\r\n", years, timeRes > YEARS_TO_PASS ? "[OK]" : "[FAIL]");
 
     eth.disconnect();
