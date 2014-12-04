@@ -1,6 +1,9 @@
 #include "mbed.h"
 #include "EthernetInterface.h"
 #include "test_env.h"
+
+#include "socket_types_impl.h"
+#include "socket_buffer.h"
 #include "UDPaSocket.h"
 
 #define UDP_TIME_PORT 37
@@ -38,6 +41,7 @@ public:
     }
     uint32_t getTime(const char *address) {
         ip_addr_t addr;
+        socket_error_t err;
         // TODO: add abstracted address functions
         if (!ipaddr_aton(HTTP_SERVER_NAME,&addr)) {
             defaultHandler(0);
@@ -48,9 +52,21 @@ public:
         // Zero the buffer memory
         memset(inBuf.buffer,0,inBuf.length);
         handler_t rxh = (handler_t)_recv_irq.entry();
-        sock.start_recv(&inBuf, 0, rxh);
+        printf("starting receive...\r\n");
+        err = sock.start_recv(&inBuf, 0, rxh);
+        if(err != SOCKET_ERROR_NONE) {
+            printf("RX Socket Error %d\r\n",err);
+            return 0;
+        }
+
         handler_t txh = (handler_t)_send_irq.entry();
+        printf("starting send...\r\n");
         sock.start_send_to((struct socket_addr *)&addr, _udpTimePort, &outBuf, 0, txh);
+        if(err != SOCKET_ERROR_NONE) {
+            printf("TX Socket Error %d\r\n",err);
+            return 0;
+        }
+
         while(!received) { __WFI(); }
 
         uint32_t time;
@@ -62,12 +78,40 @@ public:
     }
 protected:
     void defaultHandler(void* arg) {
-        printf("Caught a default event\n");
+        const char * str;
+        socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
+        printf("Default Event Handler\r\n");
+        switch(event->event) {
+        case SOCKET_EVENT_ERROR:
+            str = "error";
+            break;
+        case SOCKET_EVENT_NONE:
+            str = "no event";
+            break;
+        case SOCKET_EVENT_RX_DONE:
+            str = "rx done";
+            break;
+        case SOCKET_EVENT_RX_ERROR:
+            str = "rx error";
+            break;
+        case SOCKET_EVENT_TX_DONE:
+            str = "tx done";
+            break;
+        case SOCKET_EVENT_TX_ERROR:
+            str = "tx error";
+            break;
+        default:
+            str = "unknown event";
+            break;
+        }
+        printf("Event type: %s\r\n", str);
     }
     void sendHandler(void *arg) {
-        printf("message sent\n");
+        printf("message sent\r\n");
     }
     void recvHandler(void *arg) {
+        socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
+        socket_copy_to_user(rxBuf,event->i.r.buf,sizeof(rxBuf));
         received = true;
     }
 protected:
@@ -92,10 +136,11 @@ int main() {
     EthernetInterface eth;
     printf("Starting.\r\n");
     eth.init(); //Use DHCP
+    printf("Running eth.connect()\r\n");
     eth.connect();
-    printf("UDP client IP Address is %s\n", eth.getIPAddress());
+    printf("UDP client IP Address is %s\r\n", eth.getIPAddress());
     UDPGetTime gt;
-    printf("Connecting to: %s:%d\n", HTTP_SERVER_NAME, UDP_TIME_PORT);
+    printf("Connecting to: %s:%d\r\n", HTTP_SERVER_NAME, UDP_TIME_PORT);
     uint32_t timeRes = gt.getTime(HTTP_SERVER_NAME);
 
 
