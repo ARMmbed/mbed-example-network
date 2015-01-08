@@ -1,0 +1,20 @@
+
+{
+    "name": "mbed-example-network",
+    "version": "0.0.0",
+    "description": "",
+    "keywords": [
+    ],
+    "author": "name <email@arm.com>",
+    "repository": {
+        "url": "git@github.com:ARMmbed/mbed-example-network.git",
+        "type": "git"
+    },
+    "homepage": "https://github.com/ARMmbed/mbed-example-network",
+    "license": "Apache-2",
+    "dependencies": {
+    },
+    "extraIncludes": ["mbed-example-network"],
+    "targetDependencies": {
+    }
+}
