@@ -1,10 +1,10 @@
 #include "mbed.h"
+#include "UDPaSocket.h"
+
 #include "EthernetInterface.h"
 #include "test_env.h"
 
-#include "socket_types_impl.h"
 #include "socket_buffer.h"
-#include "UDPaSocket.h"
 
 #define UDP_TIME_PORT 37
 
@@ -24,36 +24,35 @@ public:
                     _udpTimePort(UDP_TIME_PORT),
                     _default_irq(this),
                     _recv_irq(this),
-                    _send_irq(this)
+                    _send_irq(this),
+                    _dns_irq(this)
     {
-        strcpy(txBuf,"foo");
-        inBuf.buffer = rxBuf;
-        inBuf.length = sizeof(rxBuf);
-        inBuf.pos    = 0;
-        outBuf.buffer = txBuf;
-        outBuf.length = sizeof(txBuf);
-        outBuf.pos    = 0;
+        strcpy(_txBuf,"foo");
 
         _default_irq.callback(&UDPGetTime::defaultHandler);
         _send_irq.callback(&UDPGetTime::sendHandler);
         _recv_irq.callback(&UDPGetTime::recvHandler);
+        _dns_irq.callback(&UDPGetTime::onDNS);
 
     }
     uint32_t getTime(const char *address) {
-        ip_addr_t addr;
         socket_error_t err;
         // TODO: add abstracted address functions
-        if (!ipaddr_aton(HTTP_SERVER_NAME,&addr)) {
-            defaultHandler(0);
-            return 0;
+        resolved = false;
+        memset(&_resolvedAddr,0,sizeof(_resolvedAddr));
+        err = sock.resolve(address,&_resolvedAddr,(handler_t)_dns_irq.entry());
+        if (err == SOCKET_ERROR_BUSY) {
+            while (!resolved) {__WFI();}
+        } else if (err != SOCKET_ERROR_NONE) {
+            defaultHandler(NULL);
         }
 
         received = false;
         // Zero the buffer memory
-        memset(inBuf.buffer,0,inBuf.length);
+        memset(_rxBuf,0,sizeof(_rxBuf));
         handler_t rxh = (handler_t)_recv_irq.entry();
         printf("starting receive...\r\n");
-        err = sock.start_recv(&inBuf, 0, rxh);
+        err = sock.start_recv(rxh);
         if(err != SOCKET_ERROR_NONE) {
             printf("RX Socket Error %d\r\n",err);
             return 0;
@@ -61,7 +60,7 @@ public:
 
         handler_t txh = (handler_t)_send_irq.entry();
         printf("starting send...\r\n");
-        sock.start_send_to((struct socket_addr *)&addr, _udpTimePort, &outBuf, 0, txh);
+        sock.start_send_to(&_resolvedAddr, _udpTimePort, _txBuf, strlen(_txBuf), 0, txh);
         if(err != SOCKET_ERROR_NONE) {
             printf("TX Socket Error %d\r\n",err);
             return 0;
@@ -71,13 +70,14 @@ public:
 
         uint32_t time;
         // Correct for possible non 32-bit alignment
-        memcpy(&time, rxBuf, sizeof(time));
+        memcpy(&time, _rxBuf, sizeof(time));
         // Switch to host order
         time = ntohl(time);
         return time;
     }
 protected:
     void defaultHandler(void* arg) {
+        (void) arg;
         const char * str;
         socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
         printf("Default Event Handler\r\n");
@@ -107,28 +107,39 @@ protected:
         printf("Event type: %s\r\n", str);
     }
     void sendHandler(void *arg) {
+        (void) arg;
         printf("message sent\r\n");
     }
     void recvHandler(void *arg) {
+        (void) arg;
         socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
-        socket_copy_to_user(rxBuf,event->i.r.buf,sizeof(rxBuf));
+        _sbRX.set(event->i.r.buf);
+        _sbRX.copyOut(_rxBuf, sizeof(_rxBuf));
         received = true;
     }
+    void onDNS(void * arg) {
+        (void) arg;
+        socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
+        resolved=true;
+    }
+
 protected:
     UDPaSocket sock;
+    SocketAddr _resolvedAddr;
     volatile bool received;
+    volatile bool resolved;
     const uint16_t _udpTimePort;
 protected:
-    buffer_t inBuf;
-    buffer_t outBuf;
-    char rxBuf[32];
-    char txBuf[32];
+    SocketBuffer _sbRX;
+    char _rxBuf[32];
+    char _txBuf[32];
 
     // These should not be CThunk.  We will remove CThunk from this class once
     // we decide on the function pointer format we will use for event handlers
     CThunk<UDPGetTime> _default_irq;
     CThunk<UDPGetTime> _recv_irq;
     CThunk<UDPGetTime> _send_irq;
+    CThunk<UDPGetTime> _dns_irq;
 };
 
 int main() {
