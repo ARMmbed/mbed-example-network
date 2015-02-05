@@ -37,7 +37,7 @@ public:
     }
     ~HelloHTTP()
     {
-        
+
     }
     int startTest(const char *path, const size_t pathlen)
     {
@@ -74,7 +74,8 @@ protected:
   }
   void onReceive(void * arg) {
     (void) arg;
-    SocketBuffer &sb = _stream.getRxBuf();
+
+    SocketBuffer& sb = _stream.getRxBuf();
     _bpos = sb.copyOut(_buffer, 256);
     _buffer[_bpos] = 0;
     _got200 = _got200 || strstr(_buffer, HTTP_OK_STR) != NULL;

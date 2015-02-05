@@ -1,6 +1,6 @@
 #include "mbed.h"
 #include "UDPaSocket.h"
-
+#include "socket_types.h"
 #include "EthernetInterface.h"
 #include "test_env.h"
 
@@ -17,18 +17,30 @@ namespace {
 using std::memset;
 using std::memcpy;
 
+void * socket_malloc( void * context, size_t size) {
+    (void) context;
+    return malloc(size);
+}
+void socket_free(void * context, void * ptr) {
+    (void) context;
+    free(ptr);
+}
+
+
 class UDPGetTime {
 public:
     UDPGetTime() :
-                    sock((handler_t) _default_irq.entry()),
-                    _udpTimePort(UDP_TIME_PORT),
-                    _default_irq(this),
-                    _recv_irq(this),
-                    _send_irq(this),
-                    _dns_irq(this)
-    {
+        sock((handler_t) _default_irq.entry(), &_alloc),
+        _udpTimePort(UDP_TIME_PORT),
+        _default_irq(this),
+        _recv_irq(this),
+        _send_irq(this),
+        _dns_irq(this)
+        {
         strcpy(_txBuf,"foo");
-
+        _alloc.alloc = socket_malloc;
+        _alloc.dealloc = socket_free;
+        _alloc.context = NULL;
         _default_irq.callback(&UDPGetTime::defaultHandler);
         _send_irq.callback(&UDPGetTime::sendHandler);
         _recv_irq.callback(&UDPGetTime::recvHandler);
@@ -113,13 +125,14 @@ protected:
     void recvHandler(void *arg) {
         (void) arg;
         socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
-        _sbRX.set(event->i.r.buf);
+        _sbRX.set(&(event->i.r.buf));
         _sbRX.copyOut(_rxBuf, sizeof(_rxBuf));
         received = true;
     }
     void onDNS(void * arg) {
         (void) arg;
         socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
+        (void) event;
         resolved=true;
     }
 
@@ -129,6 +142,8 @@ protected:
     volatile bool received;
     volatile bool resolved;
     const uint16_t _udpTimePort;
+
+    socket_allocator_t _alloc;
 protected:
     SocketBuffer _sbRX;
     char _rxBuf[32];
@@ -164,3 +179,6 @@ int main() {
     notify_completion(result);
     return 0;
 }
+extern "C" void HardFault_Handler() {
+    asm ("bkpt"::);
+};
