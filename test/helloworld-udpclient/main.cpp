@@ -175,6 +175,7 @@ int main() {
     printf("UDP: %lu seconds since 01/01/1900 00:00 GMT ... %s\r\n", timeRes, timeRes > 0 ? "[OK]" : "[FAIL]");
     printf("UDP: %.2f years since 01/01/1900 00:00 GMT ... %s\r\n", years, timeRes > YEARS_TO_PASS ? "[OK]" : "[FAIL]");
 
+    result = (timeRes > 0) && (timeRes > YEARS_TO_PASS);
     eth.disconnect();
     notify_completion(result);
     return 0;
