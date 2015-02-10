@@ -29,16 +29,12 @@ public:
     HelloHTTP(const char * domain, const uint16_t port) :
         _stream((handler_t)(void *)_default.entry()),
         _domain(domain), _port(port),
-        _connect(this), _receive(this), _default(this), _resolved(this),
-        status1(LED1), status2(LED2), status3(LED3)
+        _connect(this), _receive(this), _default(this), _resolved(this)
     {
         _connect.callback(&HelloHTTP::onConnect);
         _receive.callback(&HelloHTTP::onReceive);
         _default.callback(&HelloHTTP::defaultHandler);
         _resolved.callback(&HelloHTTP::onDNS);
-        status1 = 1;
-        status2 = 1;
-        status3 = 1;
     }
     ~HelloHTTP()
     {
@@ -68,7 +64,6 @@ public:
         printf("Connecting to %s:%d\n", _domain, _port);
         // Resolve the domain name:
         socket_error_t err = _stream.resolve(_domain, &_remoteAddr, (handler_t)(void *)_resolved.entry());
-        status1 = 0;
         return err;
   }
   bool done( ) {
@@ -83,7 +78,6 @@ public:
 protected:
   void onConnect() {
     //Send the request
-    status1 = 1;
     handler_t h = (handler_t)_receive.entry(); // TODO: CThunk replacement/Alpha3
     _stream.start_recv(h);
     h = NULL;
@@ -94,7 +88,6 @@ protected:
   }
   void onReceive(void * arg) {
     (void) arg;
-    status3 = 0;
     SocketBuffer& sb = _stream.getRxBuf();
     _bpos = sb.copyOut(_buffer, RECV_BUFFER_SIZE-1);
     _buffer[_bpos] = 0;
@@ -109,16 +102,16 @@ protected:
   void onDNS() {
       handler_t h = (handler_t)_connect.entry(); // TODO: CThunk replacement/Alpha3
       socket_event_t *e = _stream.getEvent();
-      if (e->i.d.addr == NULL) {
+      if (e->i.d.addr.type == SOCKET_STACK_UNINIT ||
+                e->i.d.addr.impl == NULL) {
           //Could not find DNS entry
           _error = true;
           printf("Could not find DNS entry for %s",HTTP_SERVER_NAME);
           return;
       } else {
-          _remoteAddr.setAddr(e->i.d.addr);
+          _remoteAddr.setAddr(&e->i.d.addr);
 
           int rc = _stream.connect(&_remoteAddr, _port, h);
-          status2 = 0;
           (void) rc;
           //TODO: Error checking for connect
       }
@@ -144,9 +137,6 @@ protected:
   bool _got200;
   bool _gothello;
   bool _error;
-  DigitalOut status1;
-  DigitalOut status2;
-  DigitalOut status3;
 protected:
   //TODO: Remove this section using std::function (Alpha 3)
   CThunk<HelloHTTP> _connect, _receive, _default, _resolved;
