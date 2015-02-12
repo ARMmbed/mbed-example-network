@@ -3,6 +3,8 @@
 #include "SocketBuffer.h"
 #include "EthernetInterface.h"
 #include "test_env.h"
+// TODO: Remove when yotta supports init.
+#include "lwipv4_init.h"
 
 namespace {
     const char *HTTP_SERVER_NAME = "developer.mbed.org";
@@ -26,8 +28,8 @@ namespace {
 
 class HelloHTTP {
 public:
-    HelloHTTP(const char * domain, const uint16_t port) :
-        _stream((handler_t)(void *)_default.entry()),
+    HelloHTTP(const char * domain, const uint16_t port, const socket_stack_t stack, uint16_t localPort = 0) :
+        _stream((handler_t)(void *)_default.entry(), stack),
         _domain(domain), _port(port),
         _connect(this), _receive(this), _default(this), _resolved(this)
     {
@@ -35,6 +37,7 @@ public:
         _receive.callback(&HelloHTTP::onReceive);
         _default.callback(&HelloHTTP::defaultHandler);
         _resolved.callback(&HelloHTTP::onDNS);
+        _stream.bind("0.0.0.0", localPort);
     }
     ~HelloHTTP()
     {
@@ -63,7 +66,7 @@ public:
         // Connect to the server
         printf("Connecting to %s:%d\n", _domain, _port);
         // Resolve the domain name:
-        socket_error_t err = _stream.resolve(_domain, &_remoteAddr, (handler_t)(void *)_resolved.entry());
+        socket_error_t err = _stream.resolve(_domain, (handler_t)(void *)_resolved.entry());
         return err;
   }
   bool done( ) {
@@ -144,11 +147,20 @@ protected:
 
 int main() {
     EthernetInterface eth;
+    Timer tp;
+    tp.start();
     eth.init(); //Use DHCP
     eth.connect();
+    tp.stop();
+    uint16_t localPort = (tp.read_us() % 32768) + 32768;
     printf("TCP client IP Address is %s\n", eth.getIPAddress());
 
-    HelloHTTP hello(HTTP_SERVER_NAME,HTTP_SERVER_PORT);
+    // TODO: Remove when yotta supports init
+    if (lwipv4_socket_init() != SOCKET_ERROR_NONE) {
+        notify_completion(false);
+    }
+
+    HelloHTTP hello(HTTP_SERVER_NAME, HTTP_SERVER_PORT, SOCKET_STACK_LWIP_IPV4, localPort);
     int rc = hello.startTest(HTTP_PATH,HTTP_PATH_LEN);
     if ((rc == SOCKET_ERROR_BUSY) || (rc == SOCKET_ERROR_NONE)) {
         while(!hello.done()){__WFI();}

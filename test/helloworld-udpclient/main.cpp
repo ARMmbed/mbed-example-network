@@ -4,6 +4,9 @@
 #include "EthernetInterface.h"
 #include "test_env.h"
 
+// TODO: Remove when yotta supports init.
+#include "lwipv4_init.h"
+
 #include "socket_buffer.h"
 
 #define UDP_TIME_PORT 37
@@ -29,8 +32,8 @@ void socket_free(void * context, void * ptr) {
 
 class UDPGetTime {
 public:
-    UDPGetTime() :
-        sock((handler_t) _default_irq.entry(), &_alloc),
+    UDPGetTime(const socket_stack_t stack) :
+        sock((handler_t) _default_irq.entry(), stack, &_alloc),
         _udpTimePort(UDP_TIME_PORT),
         _default_irq(this),
         _recv_irq(this),
@@ -52,7 +55,7 @@ public:
         // TODO: add abstracted address functions
         resolved = false;
         memset(&_resolvedAddr,0,sizeof(_resolvedAddr));
-        err = sock.resolve(address,&_resolvedAddr,(handler_t)_dns_irq.entry());
+        err = sock.resolve(address,(handler_t)_dns_irq.entry());
         if (err == SOCKET_ERROR_BUSY) {
             while (!resolved) {__WFI();}
         } else if (err != SOCKET_ERROR_NONE) {
@@ -72,7 +75,7 @@ public:
 
         handler_t txh = (handler_t)_send_irq.entry();
         printf("starting send...\r\n");
-        sock.start_send_to(&_resolvedAddr, _udpTimePort, _txBuf, strlen(_txBuf), 0, txh);
+        err = sock.start_send_to(&_resolvedAddr, _udpTimePort, _txBuf, strlen(_txBuf), 0, txh);
         if(err != SOCKET_ERROR_NONE) {
             printf("TX Socket Error %d\r\n",err);
             return 0;
@@ -132,6 +135,7 @@ protected:
     void onDNS(void * arg) {
         (void) arg;
         socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
+        _resolvedAddr.setAddr(&event->i.d.addr);
         (void) event;
         resolved=true;
     }
@@ -164,8 +168,12 @@ int main() {
     eth.init(); //Use DHCP
     printf("Running eth.connect()\r\n");
     eth.connect();
+
+    // TODO: Remove when yotta supports init
+    lwipv4_socket_init();
+
     printf("UDP client IP Address is %s\r\n", eth.getIPAddress());
-    UDPGetTime gt;
+    UDPGetTime gt(SOCKET_STACK_LWIP_IPV4);
     printf("Connecting to: %s:%d\r\n", HTTP_SERVER_NAME, UDP_TIME_PORT);
     uint32_t timeRes = gt.getTime(HTTP_SERVER_NAME);
 
