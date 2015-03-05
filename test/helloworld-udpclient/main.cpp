@@ -1,3 +1,7 @@
+/*
+ * PackageLicenseDeclared: Apache-2.0
+ * Copyright 2015 ARM Holdings PLC
+ */
 #include "mbed.h"
 #include "UDPaSocket.h"
 #include "socket_types.h"

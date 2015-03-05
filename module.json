@@ -1,6 +1,6 @@
 {
   "name": "mbed-example-network",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Asynch Network Examples",
   "keywords": [
     "mbed",

@@ -33,10 +33,12 @@ public:
         _domain(domain), _port(port),
         _connect(this), _receive(this), _default(this), _resolved(this)
     {
+        /* <EventHandler:toRemove> */
         _connect.callback(&HelloHTTP::onConnect);
         _receive.callback(&HelloHTTP::onReceive);
         _default.callback(&HelloHTTP::defaultHandler);
         _resolved.callback(&HelloHTTP::onDNS);
+        /* </EventHandler:toRemove> */
         _stream.bind("0.0.0.0", localPort);
     }
     ~HelloHTTP()
@@ -142,7 +144,9 @@ protected:
   bool _error;
 protected:
   //TODO: Remove this section using std::function (Alpha 3)
+  /* <EventHandler:toRemove> */
   CThunk<HelloHTTP> _connect, _receive, _default, _resolved;
+  /* </EventHandler:toRemove> */
 };
 
 int main() {
