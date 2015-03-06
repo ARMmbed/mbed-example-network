@@ -13,7 +13,7 @@
 #include <string.h>
 
 // TODO: Remove when yotta supports init.
-#include "picotcp_init.h"
+#include "lwipv4_init.h"
 
 #include "socket_buffer.h"
 
@@ -28,7 +28,7 @@ namespace {
 class UDPGetTime {
 public:
     UDPGetTime(const socket_stack_t stack) :
-        sock(stack),
+        sock(stack), _time(0),
         _udpTimePort(UDP_TIME_PORT),
         _recv_irq(this),
         _dns_irq(this)
