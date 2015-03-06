@@ -9,7 +9,7 @@
 #include "test_env.h"
 
 // TODO: Remove when yotta supports init.
-#include "lwipv4_init.h"
+#include "picotcp_init.h"
 
 #include "socket_buffer.h"
 
@@ -71,15 +71,11 @@ public:
         memset(_rxBuf,0,sizeof(_rxBuf));
         handler_t rxh = (handler_t)_recv_irq.entry();
         printf("starting receive...\r\n");
-        err = sock.start_recv(rxh);
-        if(err != SOCKET_ERROR_NONE) {
-            printf("RX Socket Error %d\r\n",err);
-            return 0;
-        }
+        sock.onRecv(rxh);
 
         handler_t txh = (handler_t)_send_irq.entry();
         printf("starting send...\r\n");
-        err = sock.start_send_to(&_resolvedAddr, _udpTimePort, _txBuf, strlen(_txBuf), 0, txh);
+        err = sock.send_to(&_resolvedAddr, _udpTimePort, _txBuf, strlen(_txBuf), txh);
         if(err != SOCKET_ERROR_NONE) {
             printf("TX Socket Error %d\r\n",err);
             return 0;
@@ -131,16 +127,13 @@ protected:
     }
     void recvHandler(void *arg) {
         (void) arg;
-        socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
-        _sbRX.set(&(event->i.r.buf));
-        _sbRX.copyOut(_rxBuf, sizeof(_rxBuf));
+        sock.recv(_rxBuf,sizeof(_rxBuf));
         received = true;
     }
     void onDNS(void * arg) {
         (void) arg;
         socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
         _resolvedAddr.setAddr(&event->i.d.addr);
-        (void) event;
         resolved=true;
     }
 
