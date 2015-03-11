@@ -3,9 +3,9 @@
  * Copyright 2015 ARM Holdings PLC
  */
 #include "mbed.h"
-#include "UDPaSocket.h"
-#include "socket_types.h"
 #include "EthernetInterface.h"
+#include "socket_types.h"
+#include "UDPaSocket.h"
 #include "test_env.h"
 
 #include <stddef.h>
@@ -14,8 +14,6 @@
 
 // TODO: Remove when yotta supports init.
 #include "lwipv4_init.h"
-
-#include "socket_buffer.h"
 
 #define UDP_TIME_PORT 37
 
@@ -28,14 +26,15 @@ namespace {
 class UDPGetTime {
 public:
     UDPGetTime(const socket_stack_t stack) :
-        sock(stack), _time(0),
+        sock(stack),
         _udpTimePort(UDP_TIME_PORT),
+		_time(0),
         _recv_irq(this),
         _dns_irq(this)
 	{
         _recv_irq.callback(&UDPGetTime::onRecv);
         _dns_irq.callback(&UDPGetTime::onDNS);
-
+        sock.open(SOCKET_AF_INET4);
     }
     socket_error_t startGetTime(const char *address) {
         socket_error_t err;
@@ -43,15 +42,9 @@ public:
         received = false;
         memset(&_resolvedAddr,0,sizeof(_resolvedAddr));
         err = sock.resolve(address,(handler_t)_dns_irq.entry());
-        if (err == SOCKET_ERROR_NONE){
-        	onDNS(NULL);
-        	return err;
-        }
-        if (err == SOCKET_ERROR_BUSY)
-        	err = SOCKET_ERROR_NONE;
 		return err;
     }
-
+    bool isReceived() {return received;}
     uint32_t getTime() { return _time;}
 protected:
     void onDNS(void * arg) {
@@ -64,7 +57,12 @@ protected:
     }
     void onRecv(void *arg) {
     	(void) arg;
-    	size_t nRx = sock.recv(_rxBuf,sizeof(_rxBuf));
+    	size_t nRx = sizeof(_rxBuf);
+    	socket_error_t err = sock.recv(_rxBuf, &nRx);
+    	if (err != SOCKET_ERROR_NONE) {
+    		printf("Socket Error %d\r\n", err);
+    	    notify_completion(false);
+    	}
         uint32_t time;
         // Correct for possible non 32-bit alignment
         memcpy(&time, _rxBuf, sizeof(time));
@@ -106,7 +104,7 @@ int main() {
     printf("Connecting to: %s:%d\r\n", HTTP_SERVER_NAME, UDP_TIME_PORT);
     gt.startGetTime(HTTP_SERVER_NAME);
 
-    while (!gt.received) { __WFI(); }
+    while (!gt.isReceived()) { __WFI(); }
 
     uint32_t timeRes = gt.getTime();
 
