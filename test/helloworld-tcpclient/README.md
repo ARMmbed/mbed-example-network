@@ -67,7 +67,7 @@ To build and run this example the requirements below are necessary:
 10. Switch back to the first terminal window, then start GDB and connect to the GDB server.
 
     ```
-    $ arm-none-eabi-gdb -ex "target remote localhost:3333" -ex load ./build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-udpclient
+    $ arm-none-eabi-gdb -ex "target remote localhost:3333" -ex load ./build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-tcpclient
     ```
     
 11. Once the program has loaded, start it.
@@ -79,13 +79,31 @@ To build and run this example the requirements below are necessary:
 12. The output in the terminal window should look like:
 
     ```
-    Starting.
-    Running eth.connect()
-    UDP client IP Address is 10.2.202.167
-    Connecting to: 128.138.140.44:37
-    UDP: 1426093904 seconds since 01/01/1900 00:00 GMT ... [OK]
-    UDP: 45.22 years since 01/01/1900 00:00 GMT ... [OK]
-    {{success}}
+	TCP client IP Address is 192.168.2.2
+	Connecting to developer.mbed.org:80
+	HTTP: Received 552 chars from server
+	HTTP: Received 200 OK status ... [OK]
+	HTTP: Received 'Hello world!' status ... [OK]
+	HTTP: Received message:
+	
+	HTTP/1.1 200 OK
+	Server: nginx/1.4.6 (Ubuntu)
+	Date: Thu, 12 Mar 2015 09:49:44 GMT
+	Content-Type: text/plain
+	Content-Length: 14
+	Connection: keep-alive
+	Set-Cookie: route=b2f3f5e3bb81248805ec388b2b077e24; Path=/compiler
+	Last-Modified: Fri, 27 Jul 2012 13:30:34 GMT
+	Accept-Ranges: bytes
+	Cache-Control: max-age=36000
+	Expires: Thu, 12 Mar 2015 19:50:12 GMT
+	X-Upstream-L3: 217.140.101.28:14101
+	X-Upstream-L2: sjc_production_router_dock1-prod-sjc
+	X-Upstream-L2-pre: 217.140.101.30:14100
+	X-Upstream-L1: primaryrouter_dock1-prod-sjc
+	
+	Hello world!
+	{{success}}
 	{{end}}
     ```
     
