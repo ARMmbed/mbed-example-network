@@ -79,14 +79,8 @@ To build and run this example the requirements below are necessary:
 12. The output in the terminal window should look like:
 
     ```
-    Starting.
-    Running eth.connect()
-    UDP client IP Address is 10.2.202.167
-    Connecting to: 128.138.140.44:37
-    UDP: 1426093904 seconds since 01/01/1900 00:00 GMT ... [OK]
-    UDP: 45.22 years since 01/01/1900 00:00 GMT ... [OK]
-    {{success}}
-	{{end}}
+    UDP client IP Address is 192.168.2.2
+    UDP: 3635245075 seconds since 01/01/1900 00:00 GMT
     ```
     
 13. The LED should blink slowly (about 0.5Hz)

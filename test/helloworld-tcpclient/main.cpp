@@ -12,8 +12,8 @@
  *  has finished.
  */
 #include "mbed.h"
-#include "EthernetInterface.h"
-#include "TCPStream.h"
+#include <mbed-net-lwip-eth/EthernetInterface.h>
+#include <mbed-net-sockets/TCPStream.h>
 #include "test_env.h"
 
 #include "lwipv4_init.h"
@@ -165,12 +165,12 @@ protected:
     }
 
 protected:
-    TCPStream _stream;              /**< The TCP Socket */
+    mbed::TCPStream _stream;        /**< The TCP Socket */
     const char *_domain;            /**< The domain name of the HTTP server */
     const uint16_t _port;           /**< The HTTP server port */
     char _buffer[RECV_BUFFER_SIZE]; /**< The response buffer */
     size_t _bpos;                   /**< The current offset in the response buffer */
-    SocketAddr _remoteAddr;         /**< The remote address */
+    mbed::SocketAddr _remoteAddr;   /**< The remote address */
     bool _got200;                   /**< Status flag for HTTP 200 */
     bool _gothello;                 /**< Status flag for finding the test string */
     bool _error;                    /**< Status flag for an error */
@@ -185,7 +185,7 @@ int main() {
     EthernetInterface eth;
     eth.init(); //Use DHCP
     eth.connect();
-    volatile int rc = lwipv4_socket_init();
+    int rc = lwipv4_socket_init();
     if (rc != SOCKET_ERROR_NONE) {
         return 1;
     }

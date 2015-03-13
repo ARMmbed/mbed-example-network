@@ -79,32 +79,30 @@ To build and run this example the requirements below are necessary:
 12. The output in the terminal window should look like:
 
     ```
-	TCP client IP Address is 192.168.2.2
-	Connecting to developer.mbed.org:80
-	HTTP: Received 552 chars from server
-	HTTP: Received 200 OK status ... [OK]
-	HTTP: Received 'Hello world!' status ... [OK]
-	HTTP: Received message:
-	
-	HTTP/1.1 200 OK
-	Server: nginx/1.4.6 (Ubuntu)
-	Date: Thu, 12 Mar 2015 09:49:44 GMT
-	Content-Type: text/plain
-	Content-Length: 14
-	Connection: keep-alive
-	Set-Cookie: route=b2f3f5e3bb81248805ec388b2b077e24; Path=/compiler
-	Last-Modified: Fri, 27 Jul 2012 13:30:34 GMT
-	Accept-Ranges: bytes
-	Cache-Control: max-age=36000
-	Expires: Thu, 12 Mar 2015 19:50:12 GMT
-	X-Upstream-L3: 217.140.101.28:14101
-	X-Upstream-L2: sjc_production_router_dock1-prod-sjc
-	X-Upstream-L2-pre: 217.140.101.30:14100
-	X-Upstream-L1: primaryrouter_dock1-prod-sjc
-	
-	Hello world!
-	{{success}}
-	{{end}}
+    TCP client IP Address is 192.168.2.2
+    Connecting to developer.mbed.org:80
+    HTTP: Received 552 chars from server
+    HTTP: Received 200 OK status ... [OK]
+    HTTP: Received 'Hello world!' status ... [OK]
+    HTTP: Received message:
+    
+    HTTP/1.1 200 OK
+    Server: nginx/1.4.6 (Ubuntu)
+    Date: Fri, 13 Mar 2015 14:17:36 GMT
+    Content-Type: text/plain
+    Content-Length: 14
+    Connection: keep-alive
+    Set-Cookie: route=4f2fe48bfdc4a79550bab031c790587a; Path=/compiler
+    Last-Modified: Fri, 27 Jul 2012 13:30:34 GMT
+    Accept-Ranges: bytes
+    Cache-Control: max-age=36000
+    Expires: Sat, 14 Mar 2015 00:17:36 GMT
+    X-Upstream-L3: 217.140.101.28:14101
+    X-Upstream-L2: sjc_production_router_dock0-prod-sjc
+    X-Upstream-L2-pre: 217.140.101.28:14100
+    X-Upstream-L1: primaryrouter_dock0-prod-sjc
+    
+    Hello world!
     ```
     
 13. The LED should blink slowly (about 0.5Hz)

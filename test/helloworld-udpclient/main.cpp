@@ -12,9 +12,8 @@
  *  has finished.
  */
 #include "mbed.h"
-#include "EthernetInterface.h"
-#include "socket_types.h"
-#include "UDPaSocket.h"
+#include <mbed-net-lwip-eth/EthernetInterface.h>
+#include <mbed-net-sockets/UDPSocket.h>
 #include "test_env.h"
 
 #include <stddef.h>
@@ -126,8 +125,8 @@ protected:
     }
 
 protected:
-    UDPaSocket sock;
-    SocketAddr _resolvedAddr;
+    mbed::UDPSocket sock;
+    mbed::SocketAddr _resolvedAddr;
     volatile bool received;
     volatile bool resolved;
     const uint16_t _udpTimePort;
