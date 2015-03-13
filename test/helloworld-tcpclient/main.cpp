@@ -51,9 +51,6 @@ public:
     HelloHTTP(const char * domain, const uint16_t port) :
             _stream(SOCKET_STACK_LWIP_IPV4), _domain(domain), _port(port), _connect(this), _receive(this), _resolved(this)
     {
-        _connect.callback(&HelloHTTP::onConnect);
-        _receive.callback(&HelloHTTP::onReceive);
-        _resolved.callback(&HelloHTTP::onDNS);
 
         _error = false;
         _gothello = false;
@@ -68,8 +65,8 @@ public:
      *
      * @param[in] path The path of the file to fetch from the HTTP server
      * @return SOCKET_ERROR_NONE on success, or an error code on failure
-     */
-    int startTest(const char *path) {
+	 */
+	int startTest(const char *path) {
         /* Initialize the flags */
         _got200 = false;
         _gothello = false;
@@ -174,21 +171,14 @@ protected:
     bool _got200;                   /**< Status flag for HTTP 200 */
     bool _gothello;                 /**< Status flag for finding the test string */
     bool _error;                    /**< Status flag for an error */
-protected:
-    CThunk<HelloHTTP> _connect, _receive, _resolved;
 };
 
 /**
  * The main loop of the TCP Hello World test
  */
 int main() {
-    EthernetInterface eth;
-    eth.init(); //Use DHCP
-    eth.connect();
-    int rc = lwipv4_socket_init();
-    if (rc != SOCKET_ERROR_NONE) {
-        return 1;
-    }
+	EthernetInterface eth;
+	Timer tp;      /**< Use a timer to record how long DHCP takes */
 
     printf("TCP client IP Address is %s\n", eth.getIPAddress());
 
