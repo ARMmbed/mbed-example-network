@@ -46,13 +46,8 @@ public:
     UDPGetTime() :
         sock(SOCKET_STACK_LWIP_IPV4),
         _udpTimePort(UDP_TIME_PORT),
-        _time(0),
-        _recv_irq(this),
-        _dns_irq(this)
+        _time(0)
     {
-        /* Initialize callbacks for events */
-        _recv_irq.callback(&UDPGetTime::onRecv);
-        _dns_irq.callback(&UDPGetTime::onDNS);
         /* Open the UDP socket so that DNS will work */
         sock.open(SOCKET_AF_INET4);
     }
@@ -67,7 +62,7 @@ public:
         resolved = false;
         received = false;
         /* Start the DNS operation */
-        return sock.resolve(address,(handler_t)_dns_irq.entry());
+        return sock.resolve(address,handler_t(this, &UDPGetTime::onDNS));
     }
     /**
      * Check if the UDP time response has been received
@@ -86,15 +81,14 @@ protected:
      * The DNS Response Handler
      * @param[in] arg (unused)
      */
-    void onDNS(void * arg) {
-        (void) arg;
+    void onDNS(socket_error_t err) {
         /* Extract the Socket event to read the resolved address */
-        socket_event_t *event = sock.getEvent(); // TODO: (CThunk upgrade/Alpha2)
+        socket_event_t *event = sock.getEvent();
         _resolvedAddr.setAddr(&event->i.d.addr);
         /* Register the read handler */
-        sock.setOnReadable((handler_t)_recv_irq.entry());
+        sock.setOnReadable(handler_t(this, &UDPGetTime::onRecv));
         /* Send the query packet to the remote host */
-        socket_error_t err = sock.send_to("time",strlen("time"),&_resolvedAddr,_udpTimePort);
+        err = sock.send_to("time",strlen("time"),&_resolvedAddr,_udpTimePort);
         /* A failure on send is a fatal error in this example */
         if (err != SOCKET_ERROR_NONE) {
             printf("Socket Error %d\r\n", err);
@@ -105,12 +99,11 @@ protected:
      * The Time Query response handler
      * @param[in] arg (unused)
      */
-    void onRecv(void *arg) {
-        (void) arg;
+    void onRecv(socket_error_t err) {
         /* Initialize the buffer size */
         size_t nRx = sizeof(_rxBuf);
         /* Receive some bytes */
-        socket_error_t err = sock.recv(_rxBuf, &nRx);
+        err = sock.recv(_rxBuf, &nRx);
         /* A failure on recv is a fatal error in this example */
         if (err != SOCKET_ERROR_NONE) {
             printf("Socket Error %d\r\n", err);
@@ -134,12 +127,6 @@ protected:
 
 protected:
     char _rxBuf[32];
-    /*
-     * Note that CThunk is used for event handlers.  This will be changed to a C++
-     * function pointer in an upcoming release.
-     */
-    CThunk<UDPGetTime> _recv_irq;
-    CThunk<UDPGetTime> _dns_irq;
 };
 
 int main() {
