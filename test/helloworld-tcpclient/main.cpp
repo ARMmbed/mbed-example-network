@@ -49,11 +49,8 @@ public:
      * @param[in] port The port of the HTTP server
      */
     HelloHTTP(const char * domain, const uint16_t port) :
-            _stream(SOCKET_STACK_LWIP_IPV4), _domain(domain), _port(port), _connect(this), _receive(this), _resolved(this)
+            _stream(SOCKET_STACK_LWIP_IPV4), _domain(domain), _port(port)
     {
-        _connect.callback(&HelloHTTP::onConnect);
-        _receive.callback(&HelloHTTP::onReceive);
-        _resolved.callback(&HelloHTTP::onDNS);
 
         _error = false;
         _gothello = false;
@@ -68,8 +65,8 @@ public:
      *
      * @param[in] path The path of the file to fetch from the HTTP server
      * @return SOCKET_ERROR_NONE on success, or an error code on failure
-     */
-    int startTest(const char *path) {
+	 */
+	socket_error_t startTest(const char *path) {
         /* Initialize the flags */
         _got200 = false;
         _gothello = false;
@@ -80,8 +77,7 @@ public:
         /* Connect to the server */
         printf("Connecting to %s:%d\n", _domain, _port);
         /* Resolve the domain name: */
-        socket_error_t err = _stream.resolve(_domain,
-                (handler_t) (void *) _resolved.entry());
+        socket_error_t err = _stream.resolve(_domain, handler_t(this, &HelloHTTP::onDNS));
         return err;
     }
     /**
@@ -109,12 +105,11 @@ protected:
      * On Connect handler
      * Sends the request which was generated in startTest
      */
-    void onConnect() {
+    void onConnect(socket_error_t err) {
         /* Send the request */
-        handler_t h = (handler_t) _receive.entry();
-        _stream.setOnReadable(h);
-        socket_error_t rc = _stream.send(_buffer, _bpos);
-        if (rc != SOCKET_ERROR_NONE) {
+        _stream.setOnReadable(handler_t(this, &HelloHTTP::onReceive));
+        err = _stream.send(_buffer, _bpos);
+        if (err != SOCKET_ERROR_NONE) {
             _error = true;
         }
     }
@@ -122,10 +117,10 @@ protected:
      * On Receive handler
      * Parses the response from the server, to check for the HTTP 200 status code and the expected response ("Hello World!")
      */
-    void onReceive() {
+    void onReceive(socket_error_t err) {
         _bpos = sizeof(_buffer);
         /* Read data out of the socket */
-        socket_error_t err = _stream.recv(_buffer, &_bpos);
+        err = _stream.recv(_buffer, &_bpos);
         if (err != SOCKET_ERROR_NONE) {
             _error = true;
             return;
@@ -145,8 +140,7 @@ protected:
      * On DNS Handler
      * Reads the address returned by DNS, then starts the connect process.
      */
-    void onDNS() {
-        handler_t h = (handler_t) _connect.entry();
+    void onDNS(socket_error_t err) {
         socket_event_t *e = _stream.getEvent();
         /* Check that the result is a valid DNS response */
         if (e->i.d.addr.type == SOCKET_STACK_UNINIT) {
@@ -157,7 +151,7 @@ protected:
         } else {
             /* Start connecting to the remote host */
             _remoteAddr.setAddr(&e->i.d.addr);
-            socket_error_t err = _stream.connect(&_remoteAddr, _port, h);
+            err = _stream.connect(&_remoteAddr, _port, handler_t(this, &HelloHTTP::onConnect));
             if (err != SOCKET_ERROR_NONE) {
                 _error = true;
             }
@@ -174,8 +168,6 @@ protected:
     bool _got200;                   /**< Status flag for HTTP 200 */
     bool _gothello;                 /**< Status flag for finding the test string */
     bool _error;                    /**< Status flag for an error */
-protected:
-    CThunk<HelloHTTP> _connect, _receive, _resolved;
 };
 
 /**
@@ -183,17 +175,15 @@ protected:
  */
 int main() {
     EthernetInterface eth;
-    eth.init(); //Use DHCP
+    /* Initialise with DHCP, connect, and start up the stack */
+    eth.init();
     eth.connect();
-    int rc = lwipv4_socket_init();
-    if (rc != SOCKET_ERROR_NONE) {
-        return 1;
-    }
+    lwipv4_socket_init();
 
     printf("TCP client IP Address is %s\n", eth.getIPAddress());
 
     HelloHTTP hello(HTTP_SERVER_NAME, HTTP_SERVER_PORT);
-    rc = hello.startTest(HTTP_PATH);
+    socket_error_t rc = hello.startTest(HTTP_PATH);
     if (rc != SOCKET_ERROR_NONE) {
         return 1;
     }
@@ -203,7 +193,6 @@ int main() {
     /* Shut down the socket before the ethernet interface */
     hello.close();
     eth.disconnect();
-    notify_completion(!hello.error());
     return (int)hello.error();
 }
 
