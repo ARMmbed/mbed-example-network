@@ -65,8 +65,8 @@ public:
      *
      * @param[in] path The path of the file to fetch from the HTTP server
      * @return SOCKET_ERROR_NONE on success, or an error code on failure
-	 */
-	socket_error_t startTest(const char *path) {
+     */
+    socket_error_t startTest(const char *path) {
         /* Initialize the flags */
         _got200 = false;
         _gothello = false;
