@@ -27,28 +27,28 @@ To build and run this example the requirements below are necessary:
     ```
     $ yt up
     ```
-    
+
 6. Check that there are no missing dependencies
 
     ```
     $ yt ls
     ```
-    
+
 7. Build the examples. This will take a long time if it is the first time that the examples have been built.
 
     ```
     $ yt build
     ```
-    
+
 8. Start the serial terminal emulator and connect to the virtual serial port presented by frdm-k64f.
 9. Open a new terminal, then start the pyOCD GDB server.
 
     ```
     $ python pyOCD/test/gdb_server.py
     ```
-    
+
     The output should look like this:
-    
+
     ```
     Welcome to the PyOCD GDB Server Beta Version
     INFO:root:new board id detected: 02400201B1130E4E4CXXXXXX
@@ -63,19 +63,19 @@ To build and run this example the requirements below are necessary:
     INFO:root:FPU present
     INFO:root:GDB server started at port:3333
     ```
-    
+
 10. Switch back to the first terminal window, then start GDB and connect to the GDB server.
 
     ```
     $ arm-none-eabi-gdb -ex "target remote localhost:3333" -ex load ./build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-tcpclient
     ```
-    
+
 11. Once the program has loaded, start it.
 
     ```
     (gdb) c
     ```
-    
+
 12. The output in the terminal window should look like:
 
     ```
@@ -85,7 +85,7 @@ To build and run this example the requirements below are necessary:
     HTTP: Received 200 OK status ... [OK]
     HTTP: Received 'Hello world!' status ... [OK]
     HTTP: Received message:
-    
+
     HTTP/1.1 200 OK
     Server: nginx/1.4.6 (Ubuntu)
     Date: Fri, 13 Mar 2015 14:17:36 GMT
@@ -101,8 +101,8 @@ To build and run this example the requirements below are necessary:
     X-Upstream-L2: sjc_production_router_dock0-prod-sjc
     X-Upstream-L2-pre: 217.140.101.28:14100
     X-Upstream-L1: primaryrouter_dock0-prod-sjc
-    
+
     Hello world!
     ```
-    
+
 13. The LED should blink slowly (about 0.5Hz)
