@@ -10,8 +10,8 @@ To build and run this example the requirements below are necessary:
   * yotta
   * python
   * arm gcc toolchain
-  * pyOCD
-  * a serial terminal emulator (e.g. screen)
+  * a serial terminal emulator (e.g. screen, pyserial, cu)
+  * optionally, for debugging, pyOCD
 * A frdm-k64f development board
 * An ethernet connection to the internet
 * An ethernet cable
@@ -19,7 +19,7 @@ To build and run this example the requirements below are necessary:
 
 ## Getting Started
 1. Connect the frdm-k64f to the internet using the ethernet cable
-2. Connect the frdm-k64f to the computer with the micro-USB cable, being careful to use the micro-usb port labled "OpenSDA"
+2. Connect the frdm-k64f to the computer with the micro-USB cable, being careful to use the micro-usb port labeled "OpenSDA"
 3. Check out a copy of mbed-example-network
 4. Open a terminal in the root mbed-example-network directory
 5. Update all the dependencies of mbed-example-network
@@ -40,8 +40,26 @@ To build and run this example the requirements below are necessary:
     $ yt build
     ```
 
-8. Start the serial terminal emulator and connect to the virtual serial port presented by frdm-k64f.
-9. Open a new terminal, then start the pyOCD GDB server.
+8. Copy `build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-udpclient.bin` to your mbed board and wait until the LED next to the USB port stops blinking.
+
+9. Start the serial terminal emulator and connect to the virtual serial port presented by frdm-k64f.
+
+10. Press the reset button on the board.
+
+12. The output in the terminal window should look like:
+
+    ```
+    UDP client IP Address is 192.168.2.2
+    UDP: 3635245075 seconds since 01/01/1900 00:00 GMT
+    ```
+
+12. The LED should blink slowly (about 0.5Hz)
+
+## Using a debugger
+
+Proceed normally until step 7 included, then:
+
+1. Open a new terminal window, then start the pyOCD GDB server.
 
     ```
     $ python pyOCD/test/gdb_server.py
@@ -64,23 +82,20 @@ To build and run this example the requirements below are necessary:
     INFO:root:GDB server started at port:3333
     ```
 
-10. Switch back to the first terminal window, then start GDB and connect to the GDB server.
+2. Open a new terminal window, go to the root directory of your copy of mbed-network-examples, then start GDB and connect to the GDB server.
 
     ```
     $ arm-none-eabi-gdb -ex "target remote localhost:3333" -ex load ./build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-udpclient
     ```
 
-11. Once the program has loaded, start it.
+3. In a third terminal window, start the serial terminal emulator and connect to the virtual serial port presented by frdm-k64f.
+
+4. Once the program has loaded, start it.
 
     ```
     (gdb) c
     ```
 
-12. The output in the terminal window should look like:
+5. The output in the terminal window should look like in step 11 above.
 
-    ```
-    UDP client IP Address is 192.168.2.2
-    UDP: 3635245075 seconds since 01/01/1900 00:00 GMT
-    ```
-
-13. The LED should blink slowly (about 0.5Hz)
+6. The LED should blink slowly (about 0.5Hz)
