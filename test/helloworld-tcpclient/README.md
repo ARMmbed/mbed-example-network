@@ -1,7 +1,7 @@
-# UDP Time Example
-This application reads the current UTC time by sending a packet to utcnist.colorado.edu (128.138.140.44)
+# HTTP file downloader (TCP Example)
+This application downloads a file from an HTTP server (mbed.org) and looks for a specific string in the returned file.
 
-This example is implemented as a logic class (UDPGetTime) wrapping a UDP socket. The logic class handles all events, leaving the main loop to just check if the process has finished.
+This example is implemented as a logic class (HelloHTTP) wrapping a TCP socket. The logic class handles all events, leaving the main loop to just check if the process has finished.
 
 ## Pre-requisites
 To build and run this example the requirements below are necessary:
@@ -50,7 +50,7 @@ To build and run this example the requirements below are necessary:
     The output should look like this:
     
     ```
-    Welcome to the PyOCD GDB Server Beta Version 
+    Welcome to the PyOCD GDB Server Beta Version
     INFO:root:new board id detected: 02400201B1130E4E4CXXXXXX
     id => usbinfo | boardname
     0 => MB MBED CM (0xd28, 0x204) [k64f]
