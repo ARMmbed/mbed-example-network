@@ -6,12 +6,12 @@ This example is implemented as a logic class (UDPGetTime) wrapping a UDP socket.
 ## Pre-requisites
 To build and run this example the requirements below are necessary:
 * A computer with the following software installed
-** CMake
-** yotta
-** python
-** arm gcc toolchain
-** pyOCD
-** a serial terminal emulator (e.g. screen)
+  * CMake
+  * yotta
+  * python
+  * arm gcc toolchain
+  * pyOCD
+  * a serial terminal emulator (e.g. screen)
 * A frdm-k64f development board
 * An ethernet connection to the internet
 * An ethernet cable
