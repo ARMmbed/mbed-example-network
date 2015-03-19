@@ -1,7 +1,9 @@
 #include "mbed.h"
 #include "EthernetInterface.h"
 #include <mbed-net-sockets/TCPListener.h>
+#include <mbed-net-socket-abstract/socket_api.h>
 #include <Timer.h>
+#include <mbed-net-lwip/lwipv4_init.h>
 
 namespace {
     const int ECHO_SERVER_PORT = 7;
@@ -11,9 +13,21 @@ class TCPEchoServer {
 public:
     TCPEchoServer():
         _server(SOCKET_STACK_LWIP_IPV4), _stream(NULL) {}
-    void start(uint16_t port) {
-        _server.bind("0.0.0.0",port);
-        _server.start_listening(handler_t(this, &TCPEchoServer::onIncoming));
+    socket_error_t start(uint16_t port) {
+
+        socket_error_t err = _server.open(SOCKET_AF_INET4);
+        if (err) {
+            return err;
+        }
+        err = _server.bind("0.0.0.0",port);
+        if (err) {
+            return err;
+        }
+        err = _server.start_listening(handler_t(this, &TCPEchoServer::onIncoming));
+        if (err) {
+            return err;
+        }
+        return SOCKET_ERROR_NONE;
     }
     void checkStream()
     {
@@ -68,10 +82,14 @@ int main (void) {
     EthernetInterface eth;
     eth.init(); //Use DHCP
     eth.connect();
+    lwipv4_socket_init();
     printf("MBED: Server IP Address is %s:%d\r\n", eth.getIPAddress(), ECHO_SERVER_PORT);
 
     TCPEchoServer server;
-    server.start(ECHO_SERVER_PORT);
+    socket_error_t err = server.start(ECHO_SERVER_PORT);
+    if (err) {
+        printf("Socket error: %s (%d)\n", socket_strerror(err), err);
+    }
 
     while (true) {
         __WFI();
