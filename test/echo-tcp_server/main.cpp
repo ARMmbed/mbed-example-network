@@ -12,7 +12,9 @@ namespace {
 class TCPEchoServer {
 public:
     TCPEchoServer():
-        _server(SOCKET_STACK_LWIP_IPV4), _stream(NULL) {}
+        _server(SOCKET_STACK_LWIP_IPV4), _stream(NULL),
+        _disconnect_pending(false)
+        {}
     socket_error_t start(uint16_t port) {
 
         socket_error_t err = _server.open(SOCKET_AF_INET4);
@@ -31,11 +33,12 @@ public:
     }
     void checkStream()
     {
-        if (_stream != NULL) {
-            if (!_stream->isConnected()) {
+        if (_disconnect_pending) {
+            if (_stream != NULL) {
                 delete _stream;
-                _stream =  NULL;
             }
+            _stream = NULL;
+            _disconnect_pending = false;
         }
     }
 protected:
@@ -52,6 +55,7 @@ protected:
             return;
         }
         _stream->setOnReadable(handler_t(this, &TCPEchoServer::onRX));
+        _stream->setOnDisconnect(handler_t(this, &TCPEchoServer::onDisconnect));
 
     }
     void onRX(socket_error_t err) {
@@ -71,9 +75,14 @@ protected:
             _stream->close();
         }
     }
+    void onDisconnect(socket_error_t err) {
+        (void) err;
+        _disconnect_pending = true;
+    }
 protected:
     TCPListener _server;
     TCPStream*  _stream;
+    volatile bool _disconnect_pending;
 protected:
     char buffer[BUFFER_SIZE];
 };
