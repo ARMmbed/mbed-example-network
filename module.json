@@ -1,6 +1,6 @@
 {
   "name": "mbed-example-network",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Asynch Network Examples",
   "keywords": [
     "mbed",
@@ -18,7 +18,7 @@
   ],
   "dependencies": {
     "mbed": "ARMmbed/mbed-sdk-private",
-    "mbed-net-sockets" : "ARMmbed/mbed-net-sockets#~0.0.2"
+    "mbed-net-sockets" : "ARMmbed/mbed-net-sockets#~0.0.3"
   },
   "targetDependencies": {},
   "bin": "./source/"
