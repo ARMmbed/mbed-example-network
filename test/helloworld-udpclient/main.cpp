@@ -135,7 +135,7 @@ protected:
     volatile bool received;
     volatile bool resolved;
     const uint16_t _udpTimePort;
-    uint32_t _time;
+    volatile uint32_t _time;
 
 protected:
     char _rxBuf[32];
