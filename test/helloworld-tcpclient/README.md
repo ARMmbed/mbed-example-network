@@ -20,13 +20,7 @@ To build and run this example the requirements below are necessary:
 ## Getting Started
 1. Connect the frdm-k64f to the internet using the ethernet cable
 2. Connect the frdm-k64f to the computer with the micro-USB cable, being careful to use the micro-usb port labeled "OpenSDA"
-3. Check out a copy of mbed-example-network
 4. Open a terminal in the root mbed-example-network directory
-5. Update all the dependencies of mbed-example-network
-
-    ```
-    $ yt up
-    ```
 
 6. Check that there are no missing dependencies
 
@@ -42,7 +36,7 @@ To build and run this example the requirements below are necessary:
 
 8. Copy `build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-tcpclient.bin` to your mbed board and wait until the LED next to the USB port stops blinking.
 
-9. Start the serial terminal emulator and connect to the virtual serial port presented by frdm-k64f.
+9. Start the serial terminal emulator and connect to the virtual serial port presented by frdm-k64f. For settings, use 9600 baud, 8N1, no flow control.
 
 10. Press the reset button on the board.
 
@@ -74,12 +68,8 @@ To build and run this example the requirements below are necessary:
 
     Hello world!
     ```
-
-12. The LED should blink slowly (about 0.5Hz)
-
 ## Using a debugger
-
-Proceed normally until step 7 included, then:
+Optionally, connect using a debugger to set breakpoints and follow program flow. Proceed normally up to and including step 5, then:
 
 1. Open a new terminal window, then start the pyOCD GDB server.
 
@@ -118,6 +108,4 @@ Proceed normally until step 7 included, then:
     (gdb) c
     ```
 
-5. The output in the terminal window should look like in step 11 above.
-
-6. The LED should blink slowly (about 0.5Hz)
+5. The output in the terminal window should look like in step 9 above.
