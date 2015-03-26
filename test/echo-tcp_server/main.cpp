@@ -1,3 +1,29 @@
+/*
+ * PackageLicenseDeclared: Apache-2.0
+ * Copyright (c) 2015 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/** \file main.cpp
+ *  \brief An example TCP Server application
+ *  This listens on TCP Port 7 for incoming connections. The server rejects incoming connections
+ *  while it has one connection active. Once an incoming connection is received, the connected socket
+ *  echos any incoming buffers back to the remote host. On disconnect, the server shuts down the echoing
+ *  socket and resumes accepting connections.
+ *
+ *  This example is implemented as a logic class (TCPEchoServer) wrapping a TCP server socket.
+ *  The logic class handles all events, leaving the main loop to just check for disconnected sockets.
+ */
 #include "mbed.h"
 #include "EthernetInterface.h"
 #include <mbed-net-sockets/TCPListener.h>
@@ -9,14 +35,27 @@ namespace {
     const int ECHO_SERVER_PORT = 7;
     const int BUFFER_SIZE = 64;
 }
+/**
+ * \brief TCPEchoServer implements the logic for listening for TCP connections and
+ *        echoing characters back to the sender.
+ */
 class TCPEchoServer {
 public:
+    /**
+     * The TCPEchoServer Constructor
+     * Initializes the server socket
+     */
     TCPEchoServer():
         _server(SOCKET_STACK_LWIP_IPV4), _stream(NULL),
         _disconnect_pending(false)
         {}
-    socket_error_t start(uint16_t port) {
-
+    /**
+     * Start the server socket up and start listening
+     * @param[in] port the port to listen on
+     * @return SOCKET_ERROR_NONE on success, or an error code on failure
+     */
+    socket_error_t start(const uint16_t port)
+    {
         socket_error_t err = _server.open(SOCKET_AF_INET4);
         if (err) {
             return err;
@@ -31,6 +70,10 @@ public:
         }
         return SOCKET_ERROR_NONE;
     }
+    /**
+     * This function is called after each interrupt to check for streams that have disconnected and
+     * require teardown.
+     */
     void checkStream()
     {
         if (_disconnect_pending) {
@@ -42,6 +85,10 @@ public:
         }
     }
 protected:
+    /**
+     * onIncomming handles the allocation of new streams when an incoming connection request is received.
+     * @param[in] err An error code.  If not SOCKET_ERROR_NONE, the server will reject the incoming connection
+     */
     void onIncoming(socket_error_t err)
     {
         socket_event_t *event = _server.getEvent();
@@ -56,8 +103,11 @@ protected:
         }
         _stream->setOnReadable(handler_t(this, &TCPEchoServer::onRX));
         _stream->setOnDisconnect(handler_t(this, &TCPEchoServer::onDisconnect));
-
     }
+    /**
+     * onRX handles incoming buffers and returns them to the sender.
+     * @param[in] err An error code.  If not SOCKET_ERROR_NONE, the server close the connection.
+     */
     void onRX(socket_error_t err) {
         if (err != SOCKET_ERROR_NONE) {
             _stream->close();
@@ -75,6 +125,10 @@ protected:
             _stream->close();
         }
     }
+    /**
+     * onDisconnect sets the _disconnect_pending flag to shut down the
+     * @param[in] err An error code.  Ignored in onDisconnect.
+     */
     void onDisconnect(socket_error_t err) {
         (void) err;
         _disconnect_pending = true;
@@ -86,7 +140,10 @@ protected:
 protected:
     char buffer[BUFFER_SIZE];
 };
-
+/**
+ * The main loop of the TCP Echo Server example
+ * @return 0; however the main loop should never return.
+ */
 int main (void) {
     EthernetInterface eth;
     eth.init(); //Use DHCP
@@ -104,4 +161,5 @@ int main (void) {
         __WFI();
         server.checkStream();
     }
+    return 0;
 }
