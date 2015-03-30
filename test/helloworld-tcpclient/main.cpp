@@ -83,11 +83,12 @@ public:
         _got200 = false;
         _gothello = false;
         _error = false;
+        _disconnected = false;
         /* Fill the request buffer */
         _bpos = snprintf(_buffer, sizeof(_buffer) - 1, "GET %s HTTP/1.1\nHost: %s\n\n", path, HTTP_SERVER_NAME);
 
         /* Connect to the server */
-        printf("Connecting to %s:%d\n", _domain, _port);
+        printf("Connecting to %s:%d\r\n", _domain, _port);
         /* Resolve the domain name: */
         socket_error_t err = _stream.resolve(_domain, handler_t(this, &HelloHTTP::onDNS));
         return err;
@@ -111,6 +112,8 @@ public:
      */
     void close() {
         _stream.close();
+        while (!_disconnected)
+            __WFI();
     }
 protected:
     /**
@@ -120,6 +123,7 @@ protected:
     void onConnect(socket_error_t err) {
         /* Send the request */
         _stream.setOnReadable(handler_t(this, &HelloHTTP::onReceive));
+        _stream.setOnDisconnect(handler_t(this, &HelloHTTP::onDisconnect));
         err = _stream.send(_buffer, _bpos);
         if (err != SOCKET_ERROR_NONE) {
             _error = true;
@@ -147,6 +151,7 @@ protected:
         printf("HTTP: Received '%s' status ... %s\r\n", HTTP_HELLO_STR, _gothello ? "[OK]" : "[FAIL]");
         printf("HTTP: Received message:\r\n\r\n");
         printf("%s", _buffer);
+        _error = !(_got200 && _gothello);
     }
     /**
      * On DNS Handler
@@ -164,10 +169,14 @@ protected:
             /* Start connecting to the remote host */
             _remoteAddr.setAddr(&e->i.d.addr);
             err = _stream.connect(&_remoteAddr, _port, handler_t(this, &HelloHTTP::onConnect));
+
             if (err != SOCKET_ERROR_NONE) {
                 _error = true;
             }
         }
+    }
+    void onDisconnect(socket_error_t err) {
+        _disconnected = true;
     }
 
 protected:
@@ -177,9 +186,10 @@ protected:
     char _buffer[RECV_BUFFER_SIZE]; /**< The response buffer */
     size_t _bpos;                   /**< The current offset in the response buffer */
     mbed::SocketAddr _remoteAddr;   /**< The remote address */
-    bool _got200;                   /**< Status flag for HTTP 200 */
-    bool _gothello;                 /**< Status flag for finding the test string */
-    bool _error;                    /**< Status flag for an error */
+    volatile bool _got200;          /**< Status flag for HTTP 200 */
+    volatile bool _gothello;        /**< Status flag for finding the test string */
+    volatile bool _error;           /**< Status flag for an error */
+    volatile bool _disconnected;
 };
 
 /**
@@ -192,7 +202,7 @@ int main() {
     eth.connect();
     lwipv4_socket_init();
 
-    printf("TCP client IP Address is %s\n", eth.getIPAddress());
+    printf("TCP client IP Address is %s\r\n", eth.getIPAddress());
 
     HelloHTTP hello(HTTP_SERVER_NAME, HTTP_SERVER_PORT);
     socket_error_t rc = hello.startTest(HTTP_PATH);
@@ -201,6 +211,9 @@ int main() {
     }
     while (!hello.done()) {
         __WFI();
+    }
+    if (hello.error()) {
+        printf("Failed to fetch %s from %s:%d\r\n", HTTP_PATH, HTTP_SERVER_NAME, HTTP_SERVER_PORT);
     }
     /* Shut down the socket before the ethernet interface */
     hello.close();
