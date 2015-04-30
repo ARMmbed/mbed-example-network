@@ -19,6 +19,7 @@ To build and run this example the following requirements are necessary:
 * An Ethernet connection to the internet.
 * An Ethernet cable.
 * A micro-USB cable.
+* If your OS is Windows, please follow the installation instructions [for the serial port driver](https://developer.mbed.org/handbook/Windows-serial-configuration).
 
 ## Getting started
 
