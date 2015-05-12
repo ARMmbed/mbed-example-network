@@ -17,8 +17,8 @@
   ],
   "extraIncludes": [],
   "dependencies": {
-    "mbed": "ARMmbed/mbed-sdk-private",
-    "mbed-net-sockets": "ARMmbed/mbed-net-sockets#~0.1.0"
+    "mbed": "~3.0.1",
+    "mbed-net-sockets": "~0.1.2"
   },
   "targetDependencies": {},
   "bin": "./source/"
