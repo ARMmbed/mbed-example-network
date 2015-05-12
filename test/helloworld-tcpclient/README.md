@@ -1,34 +1,49 @@
-# HTTP file downloader (TCP Example)
-This application downloads a file from an HTTP server (mbed.org) and looks for a specific string in the returned file.
+# HTTP File Downloader (TCP Example)
+
+This application downloads a file from an HTTP server (mbed.org) and looks for a specific string in that file.
 
 This example is implemented as a logic class (HelloHTTP) wrapping a TCP socket. The logic class handles all events, leaving the main loop to just check if the process has finished.
 
 ## Pre-requisites
-To build and run this example the requirements below are necessary:
-* A computer with the following software installed
-  * CMake
-  * yotta
-  * python
-  * arm gcc toolchain
-  * a serial terminal emulator (e.g. screen, pyserial, cu)
-  * optionally, for debugging, pyOCD
-* A frdm-k64f development board
-* An ethernet connection to the internet
-* An ethernet cable
-* A micro-USB cable
 
-## Getting Started
-1. Connect the frdm-k64f to the internet using the ethernet cable
-2. Connect the frdm-k64f to the computer with the micro-USB cable, being careful to use the micro-usb port labeled "OpenSDA"
-4. Open a terminal in the root mbed-example-network directory
+To build and run this example the following requirements are necessary:
 
-6. Check that there are no missing dependencies
+* A computer with the following software installed:
+	* [CMake](http://www.cmake.org/download/).
+	* [yotta](https://github.com/ARMmbed/yotta). Please note that **yotta has its own set of dependencies**, listed in the [installation instructions](http://armmbed.github.io/yotta/#installing-on-windows).
+	* [Python](https://www.python.org/downloads/).
+	* [ARM GCC toolchain](https://launchpad.net/gcc-arm-embedded).
+	* A serial terminal emulator (e.g. screen, pySerial, cu).
+	* Optionally, for debugging, pyOCD (can be installed using Python's [pip](https://pypi.python.org/pypi/pip)). 
+* An FRDM-K64F development board.
+* An Ethernet connection to the internet.
+* An Ethernet cable.
+* A micro-USB cable.
+* If your OS is Windows, please follow the installation instructions [for the serial port driver](https://developer.mbed.org/handbook/Windows-serial-configuration).
+
+## Getting started
+
+1. Connect the FRDM-K64F to the internet using the Ethernet cable.
+
+2. Connect the FRDM-K64F to the computer with the micro-USB cable, being careful to use the micro-USB port labeled "OpenSDA".
+
+4. Navigate to the root mbed-example-network directory that came with your release and open a terminal.
+
+5. Set the yotta target:
+	
+	```
+	yotta target frdm-k64f-gcc
+	```
+
+6. Check that there are no missing dependencies:
 
     ```
     $ yt ls
     ```
+	
+	If there are, yotta will list them in the terminal. Please install them before proceeding.
 
-7. Build the examples. This will take a long time if it is the first time that the examples have been built.
+7. Build the examples. This will take a long time if it is the first time that the examples have been built:
 
     ```
     $ yt build
@@ -36,7 +51,7 @@ To build and run this example the requirements below are necessary:
 
 8. Copy `build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-tcpclient.bin` to your mbed board and wait until the LED next to the USB port stops blinking.
 
-9. Start the serial terminal emulator and connect to the virtual serial port presented by frdm-k64f. For settings, use 9600 baud, 8N1, no flow control.
+9. Start the serial terminal emulator and connect to the virtual serial port presented by FRDM-K64F. For settings, use 9600 baud, 8N1, no flow control.
 
 10. Press the reset button on the board.
 
@@ -69,7 +84,8 @@ To build and run this example the requirements below are necessary:
     Hello world!
     ```
 ## Using a debugger
-Optionally, connect using a debugger to set breakpoints and follow program flow. Proceed normally up to and including step 5, then:
+
+Optionally, connect using a debugger to set breakpoints and follow program flow. Proceed normally up to and including step 6 (building the example), then:
 
 1. Open a new terminal window, then start the pyOCD GDB server.
 
@@ -100,7 +116,7 @@ Optionally, connect using a debugger to set breakpoints and follow program flow.
     $ arm-none-eabi-gdb -ex "target remote localhost:3333" -ex load ./build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-tcpclient
     ```
 
-3. In a third terminal window, start the serial terminal emulator and connect to the virtual serial port presented by frdm-k64f.
+3. In a third terminal window, start the serial terminal emulator and connect to the virtual serial port presented by FRDM-K64F.
 
 4. Once the program has loaded, start it.
 
@@ -108,4 +124,4 @@ Optionally, connect using a debugger to set breakpoints and follow program flow.
     (gdb) c
     ```
 
-5. The output in the terminal window should look like in step 9 above.
+5. The output in the terminal window should look like in step 10 above (the final step of the regular run).
