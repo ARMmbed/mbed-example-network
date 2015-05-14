@@ -1,6 +1,6 @@
 {
   "name": "mbed-example-network",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Asynch Network Examples",
   "private": true,
   "keywords": [
@@ -21,8 +21,14 @@
     "mbed-net-sockets": "~0.1.2"
   },
   "targetDependencies": {},
-  "scripts" : {
-      "testReporter": ["mbedgt", "--digest", "stdin", "-v", "-V"]
+  "scripts": {
+    "testReporter": [
+      "mbedgt",
+      "--digest",
+      "stdin",
+      "-v",
+      "-V"
+    ]
   },
   "bin": "./source/"
 }
