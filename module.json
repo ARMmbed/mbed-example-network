@@ -21,5 +21,8 @@
     "mbed-net-sockets": "~0.1.2"
   },
   "targetDependencies": {},
+  "scripts" : {
+      "testReporter": ["mbedgt", "--digest", "stdin", "-v", "-V"]
+  },
   "bin": "./source/"
 }

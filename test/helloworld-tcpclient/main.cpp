@@ -196,6 +196,7 @@ protected:
  * The main loop of the TCP Hello World test
  */
 int main() {
+    printf("{{start}}\r\n");
     EthernetInterface eth;
     /* Initialise with DHCP, connect, and start up the stack */
     eth.init();
@@ -218,6 +219,7 @@ int main() {
     /* Shut down the socket before the ethernet interface */
     hello.close();
     eth.disconnect();
+    printf("{{%s}}\r\n",(hello.error()?"failure":"success"));
+    printf("{{end}}\r\n");
     return (int)hello.error();
 }
-
