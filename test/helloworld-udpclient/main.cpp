@@ -40,7 +40,7 @@
 namespace {
      /* const char *HTTP_SERVER_NAME = "utcnist.colorado.edu"; */
      const char *HTTP_SERVER_NAME = "128.138.140.44";
-     const float YEARS_TO_PASS = 114.0;
+     const float YEARS_TO_PASS = 115.0;
 }
 
 /**
@@ -142,17 +142,25 @@ protected:
 };
 
 int main() {
+    printf("{{start}}\r\n");
     EthernetInterface eth;
     /* Initialise with DHCP, connect, and start up the stack */
     eth.init();
     eth.connect();
-    lwipv4_socket_init();
+    if (lwipv4_socket_init() != SOCKET_ERROR_NONE) {
+        printf("Failed to initialize LwIP\n");
+        return 1;
+    }
 
     printf("UDP client IP Address is %s\r\n", eth.getIPAddress());
 
     /* Get the current time */
     UDPGetTime gt;
-    gt.startGetTime(HTTP_SERVER_NAME);
+    socket_error_t err;
+    if ((err = gt.startGetTime(HTTP_SERVER_NAME)) != SOCKET_ERROR_NONE) {
+        printf("Failed to execute DNS query (%d)\n", err);
+        return 1;
+    }
 
     /* Wait until a response is received */
     while (!gt.isReceived()) {
@@ -162,5 +170,11 @@ int main() {
     printf("UDP: %lu seconds since 01/01/1900 00:00 GMT\r\n", gt.time());
 
     eth.disconnect();
+
+    float years = (float) gt.time() / 60 / 60 / 24 / 365;
+
+    printf("{{%s}}\r\n",(years < YEARS_TO_PASS ?"failure":"success"));
+    printf("{{end}}\r\n");
+
     return 0;
 }
