@@ -147,10 +147,7 @@ int main() {
     /* Initialise with DHCP, connect, and start up the stack */
     eth.init();
     eth.connect();
-    if (lwipv4_socket_init() != SOCKET_ERROR_NONE) {
-        printf("Failed to initialize LwIP\n");
-        return 1;
-    }
+    lwipv4_socket_init();
 
     printf("UDP client IP Address is %s\r\n", eth.getIPAddress());
 
@@ -158,7 +155,8 @@ int main() {
     UDPGetTime gt;
     socket_error_t err;
     if ((err = gt.startGetTime(HTTP_SERVER_NAME)) != SOCKET_ERROR_NONE) {
-        printf("Failed to execute DNS query (%d)\n", err);
+        printf("{{failure}}\r\n");
+        printf("{{end}}\r\n");
         return 1;
     }
 
