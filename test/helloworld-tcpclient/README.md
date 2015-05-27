@@ -14,12 +14,19 @@ To build and run this example the following requirements are necessary:
 	* [Python](https://www.python.org/downloads/).
 	* [ARM GCC toolchain](https://launchpad.net/gcc-arm-embedded).
 	* A serial terminal emulator (e.g. screen, pySerial, cu).
-	* Optionally, for debugging, pyOCD (can be installed using Python's [pip](https://pypi.python.org/pypi/pip)). 
+	* Optionally, for debugging, pyOCD (can be installed using Python's [pip](https://pypi.python.org/pypi/pip)).
 * An FRDM-K64F development board.
 * An Ethernet connection to the internet.
 * An Ethernet cable.
 * A micro-USB cable.
 * If your OS is Windows, please follow the installation instructions [for the serial port driver](https://developer.mbed.org/handbook/Windows-serial-configuration).
+
+## Known Issues
+There are two known issues with this example:
+* Dangling connections. If a connection is left unterminated, such as if the target mbed-enabled board is reset before it completes the example, the server will recognize the new connection as a repeated packet from the old connection and ignore it.  This is caused by the TCP quad (src IP/port, dest IP/port) being identical.
+* Ignored new connections. A server may recognize a repeated connection as a retransmission even after a completed TCP close. This occurs when the example has run successfully one time, then is run again by resetting the target mbed-enabled board. This is caused by the TCP quad (src IP/port, dest IP/port) being identical.
+
+It is possible to work around this problem by changing the source port number using bind.
 
 ## Getting started
 
@@ -30,7 +37,7 @@ To build and run this example the following requirements are necessary:
 4. Navigate to the root mbed-example-network directory that came with your release and open a terminal.
 
 5. Set the yotta target:
-	
+
 	```
 	yotta target frdm-k64f-gcc
 	```
@@ -40,7 +47,7 @@ To build and run this example the following requirements are necessary:
     ```
     $ yt ls
     ```
-	
+
 	If there are, yotta will list them in the terminal. Please install them before proceeding.
 
 7. Build the examples. This will take a long time if it is the first time that the examples have been built:
