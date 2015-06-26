@@ -160,14 +160,17 @@ protected:
     void onDNS(socket_error_t err) {
         socket_event_t *e = _stream.getEvent();
         /* Check that the result is a valid DNS response */
-        if (e->i.d.addr.type == SOCKET_STACK_UNINIT) {
+        if (socket_addr_is_any(&e->i.d.addr)) {
             /* Could not find DNS entry */
             _error = true;
             printf("Could not find DNS entry for %s", HTTP_SERVER_NAME);
             return;
         } else {
             /* Start connecting to the remote host */
+            char buf[16];
             _remoteAddr.setAddr(&e->i.d.addr);
+            _remoteAddr.fmtIPv4(buf,sizeof(buf));
+            printf("%s address: %s\r\n",e->i.d.domain, buf);
             err = _stream.connect(&_remoteAddr, _port, handler_t(this, &HelloHTTP::onConnect));
 
             if (err != SOCKET_ERROR_NONE) {
@@ -176,6 +179,7 @@ protected:
         }
     }
     void onDisconnect(socket_error_t err) {
+        (void) err;
         _disconnected = true;
     }
 
