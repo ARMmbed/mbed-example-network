@@ -26,15 +26,17 @@
  */
 #include "mbed.h"
 #include "EthernetInterface.h"
-#include <mbed-net-sockets/TCPListener.h>
-#include <mbed-net-socket-abstract/socket_api.h>
-#include <Timer.h>
-#include <mbed-net-lwip/lwipv4_init.h>
+#include "mbed-net-sockets/TCPListener.h"
+#include "mbed-net-socket-abstract/socket_api.h"
+#include "Timer.h"
+#include "mbed-net-lwip/lwipv4_init.h"
+#include "minar/minar.h"
 
 namespace {
     const int ECHO_SERVER_PORT = 7;
     const int BUFFER_SIZE = 64;
 }
+using namespace mbed::Sockets::v0;
 /**
  * \brief TCPEchoServer implements the logic for listening for TCP connections and
  *        echoing characters back to the sender.
@@ -48,90 +50,76 @@ public:
     TCPEchoServer():
         _server(SOCKET_STACK_LWIP_IPV4), _stream(NULL),
         _disconnect_pending(false)
-        {}
+        {
+            _server.setOnError(TCPStream::ErrorHandler_t(this, &TCPEchoServer::onError));
+        }
     /**
      * Start the server socket up and start listening
      * @param[in] port the port to listen on
      * @return SOCKET_ERROR_NONE on success, or an error code on failure
      */
-    socket_error_t start(const uint16_t port)
+    void start(const uint16_t port)
     {
-        socket_error_t err = _server.open(SOCKET_AF_INET4);
-        if (err) {
-            return err;
-        }
-        err = _server.bind("0.0.0.0",port);
-        if (err) {
-            return err;
-        }
-        err = _server.start_listening(handler_t(this, &TCPEchoServer::onIncoming));
-        if (err) {
-            return err;
-        }
-        return SOCKET_ERROR_NONE;
-    }
-    /**
-     * This function is called after each interrupt to check for streams that have disconnected and
-     * require teardown.
-     */
-    void checkStream()
-    {
-        if (_disconnect_pending) {
-            if (_stream != NULL) {
-                delete _stream;
-            }
-            _stream = NULL;
-            _disconnect_pending = false;
-        }
+        do {
+            socket_error_t err = _server.open(SOCKET_AF_INET4);
+            if (_server.error_check(err)) break;
+            err = _server.bind("0.0.0.0",port);
+            if (_server.error_check(err)) break;
+            err = _server.start_listening(TCPListener::IncomingHandler_t(this, &TCPEchoServer::onIncoming));
+            if (_server.error_check(err)) break;
+        } while (0);
     }
 protected:
+    void onError(Socket *s, socket_error_t err) {
+        (void) s;
+        printf("MBED: Socket Error: %s (%d)\r\n", socket_strerror(err), err);
+        if (_stream != NULL) {
+            _stream->close();
+        }
+
+    }
     /**
      * onIncomming handles the allocation of new streams when an incoming connection request is received.
      * @param[in] err An error code.  If not SOCKET_ERROR_NONE, the server will reject the incoming connection
      */
-    void onIncoming(socket_error_t err)
+    void onIncoming(TCPListener *s, void *impl)
     {
-        socket_event_t *event = _server.getEvent();
-        if (err != SOCKET_ERROR_NONE || _stream != NULL) {
-            event->i.a.reject = 1;
-            return;
-        }
-        _stream = _server.accept(static_cast<struct socket *>(event->i.a.newimpl));
-        if (_stream == NULL) {
-            event->i.a.reject = 1;
-            return;
-        }
-        _stream->setOnReadable(handler_t(this, &TCPEchoServer::onRX));
-        _stream->setOnDisconnect(handler_t(this, &TCPEchoServer::onDisconnect));
+        do {
+            if (impl == NULL) {
+                onError(s, SOCKET_ERROR_NULL_PTR);
+                break;
+            }
+            _stream = _server.accept(impl);
+            if (_stream == NULL) {
+                onError(s, SOCKET_ERROR_BAD_ALLOC);
+                break;
+            }
+            _stream->setOnError(TCPStream::ErrorHandler_t(this, &TCPEchoServer::onError));
+            _stream->setOnReadable(TCPStream::ReadableHandler_t(this, &TCPEchoServer::onRX));
+            _stream->setOnDisconnect(TCPStream::DisconnectHandler_t(this, &TCPEchoServer::onDisconnect));
+        } while (0);
     }
     /**
      * onRX handles incoming buffers and returns them to the sender.
      * @param[in] err An error code.  If not SOCKET_ERROR_NONE, the server close the connection.
      */
-    void onRX(socket_error_t err) {
-        if (err != SOCKET_ERROR_NONE) {
-            _stream->close();
-            return;
-        }
+    void onRX(Socket *s) {
+        socket_error_t err;
         size_t size = BUFFER_SIZE-1;
-        err = _stream->recv(buffer, &size);
-        if (err != SOCKET_ERROR_NONE) {
-            _stream->close();
-            return;
-        }
-        buffer[size]=0;
-        err = _stream->send(buffer,size);
-        if (err != SOCKET_ERROR_NONE) {
-            _stream->close();
+        err = s->recv(buffer, &size);
+        if (!s->error_check(err)) {
+            buffer[size]=0;
+            err = s->send(buffer,size);
+            if (err != SOCKET_ERROR_NONE)
+                onError(s, err);
         }
     }
     /**
-     * onDisconnect sets the _disconnect_pending flag to shut down the
-     * @param[in] err An error code.  Ignored in onDisconnect.
+     * onDisconnect deletes closed streams
      */
-    void onDisconnect(socket_error_t err) {
-        (void) err;
-        _disconnect_pending = true;
+    void onDisconnect(TCPStream *s) {
+        if(s != NULL)
+            delete s;
     }
 protected:
     TCPListener _server;
@@ -152,14 +140,11 @@ int main (void) {
     printf("MBED: Server IP Address is %s:%d\r\n", eth.getIPAddress(), ECHO_SERVER_PORT);
 
     TCPEchoServer server;
-    socket_error_t err = server.start(ECHO_SERVER_PORT);
-    if (err) {
-        printf("Socket error: %s (%d)\n", socket_strerror(err), err);
+    {
+        mbed::FunctionPointer1<void, uint16_t> fp(&server, &TCPEchoServer::start);
+        minar::Scheduler::postCallback(fp.bind(ECHO_SERVER_PORT));
     }
+    minar::Scheduler::start();
 
-    while (true) {
-        __WFI();
-        server.checkStream();
-    }
     return 0;
 }

@@ -17,8 +17,8 @@
   ],
   "extraIncludes": [],
   "dependencies": {
-    "mbed": "~3.0.1",
-    "mbed-net-sockets": "~0.1.2"
+    "mbed-core": "~0.2.5",
+    "mbed-net-sockets": "~0.2.0"
   },
   "targetDependencies": {},
   "scripts": {
