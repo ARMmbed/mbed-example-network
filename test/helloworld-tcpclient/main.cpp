@@ -24,7 +24,7 @@
  *  has finished.
  */
 #include "mbed.h"
-#include "mbed-net-lwip-eth/EthernetInterface.h"
+#include "EthernetInterface.h"
 #include "mbed-net-sockets/TCPStream.h"
 #include "test_env.h"
 #include "minar/minar.h"
