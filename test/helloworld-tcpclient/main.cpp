@@ -91,7 +91,7 @@ public:
         _bpos = snprintf(_buffer, sizeof(_buffer) - 1, "GET %s HTTP/1.1\nHost: %s\n\n", path, HTTP_SERVER_NAME);
 
         /* Connect to the server */
-        printf("Connecting to %s:%d\r\n", _domain, _port);
+        printf("Starting DNS lookup for %s\r\n", _domain);
         /* Resolve the domain name: */
         socket_error_t err = _stream.resolve(_domain, TCPStream::DNSHandler_t(this, &HelloHTTP::onDNS));
         _stream.error_check(err);
@@ -116,16 +116,21 @@ protected:
         printf("MBED: Socket Error: %s (%d)\r\n", socket_strerror(err), err);
         _stream.close();
         _error = true;
-        minar::Scheduler::stop();
+        printf("{{%s}}\r\n",(error()?"failure":"success"));
+        printf("{{end}}\r\n");
     }
     /**
      * On Connect handler
      * Sends the request which was generated in startTest
      */
     void onConnect(TCPStream *s) {
+        char buf[16];
+        _remoteAddr.fmtIPv4(buf,sizeof(buf));
+        printf("Connected to %s:%d\r\n", buf, _port);
         /* Send the request */
         s->setOnReadable(TCPStream::ReadableHandler_t(this, &HelloHTTP::onReceive));
         s->setOnDisconnect(TCPStream::DisconnectHandler_t(this, &HelloHTTP::onDisconnect));
+        printf("Sending HTTP Get Request...\r\n");
         socket_error_t err = _stream.send(_buffer, _bpos);
         s->error_check(err);
     }
@@ -134,6 +139,7 @@ protected:
      * Parses the response from the server, to check for the HTTP 200 status code and the expected response ("Hello World!")
      */
     void onReceive(Socket *s) {
+        printf("HTTP Response received.\r\n");
         _bpos = sizeof(_buffer);
         /* Read data out of the socket */
         socket_error_t err = s->recv(_buffer, &_bpos);
@@ -170,7 +176,8 @@ protected:
             char buf[16];
             _remoteAddr.setAddr(&addr);
             _remoteAddr.fmtIPv4(buf,sizeof(buf));
-            printf("%s address: %s\r\n",domain, buf);
+            printf("DNS Response Received:\r\n%s: %s\r\n", domain, buf);
+            printf("Connecting to %s:%d\r\n", buf, _port);
             socket_error_t err = _stream.connect(_remoteAddr, _port, TCPStream::ConnectHandler_t(this, &HelloHTTP::onConnect));
 
             if (err != SOCKET_ERROR_NONE) {
@@ -180,7 +187,8 @@ protected:
     }
     void onDisconnect(TCPStream *s) {
         s->close();
-        minar::Scheduler::stop();
+        printf("{{%s}}\r\n",(error()?"failure":"success"));
+        printf("{{end}}\r\n");
     }
 
 protected:
@@ -199,26 +207,22 @@ protected:
 /**
  * The main loop of the TCP Hello World test
  */
-int main() {
+EthernetInterface eth;
+HelloHTTP *hello;
+
+void app_start(int argc, char *argv[]) {
+    (void) argc;
+    (void) argv;
     printf("{{start}}\r\n");
-    EthernetInterface eth;
     /* Initialise with DHCP, connect, and start up the stack */
     eth.init();
     eth.connect();
     lwipv4_socket_init();
 
+    hello = new HelloHTTP(HTTP_SERVER_NAME, HTTP_SERVER_PORT);
+
     printf("TCP client IP Address is %s\r\n", eth.getIPAddress());
 
-    HelloHTTP hello(HTTP_SERVER_NAME, HTTP_SERVER_PORT);
-    {
-        mbed::FunctionPointer1<void, const char*> fp(&hello, &HelloHTTP::startTest);
-        minar::Scheduler::postCallback(fp.bind(HTTP_PATH));
-    }
-
-    minar::Scheduler::start();
-
-    eth.disconnect();
-    printf("{{%s}}\r\n",(hello.error()?"failure":"success"));
-    printf("{{end}}\r\n");
-    return (int)hello.error();
+    mbed::FunctionPointer1<void, const char*> fp(hello, &HelloHTTP::startTest);
+    minar::Scheduler::postCallback(fp.bind(HTTP_PATH));
 }

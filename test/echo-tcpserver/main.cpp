@@ -128,23 +128,16 @@ protected:
 protected:
     char buffer[BUFFER_SIZE];
 };
-/**
- * The main loop of the TCP Echo Server example
- * @return 0; however the main loop should never return.
- */
-int main (void) {
-    EthernetInterface eth;
+EthernetInterface eth;
+TCPEchoServer server;
+
+void app_start(int argc, char *argv[]) {
+    (void) argc;
+    (void) argv;
     eth.init(); //Use DHCP
     eth.connect();
     lwipv4_socket_init();
     printf("MBED: Server IP Address is %s:%d\r\n", eth.getIPAddress(), ECHO_SERVER_PORT);
-
-    TCPEchoServer server;
-    {
-        mbed::FunctionPointer1<void, uint16_t> fp(&server, &TCPEchoServer::start);
-        minar::Scheduler::postCallback(fp.bind(ECHO_SERVER_PORT));
-    }
-    minar::Scheduler::start();
-
-    return 0;
+    mbed::FunctionPointer1<void, uint16_t> fp(&server, &TCPEchoServer::start);
+    minar::Scheduler::postCallback(fp.bind(ECHO_SERVER_PORT));
 }

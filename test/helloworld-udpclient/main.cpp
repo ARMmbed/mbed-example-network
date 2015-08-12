@@ -135,7 +135,11 @@ protected:
         memcpy(&time, _rxBuf, sizeof(time));
         /* Switch to host order */
         _time = ntohl(time);
-        minar::Scheduler::stop();
+
+        printf("UDP: %lu seconds since 01/01/1900 00:00 GMT\r\n", _time);
+        float years = (float) _time / 60 / 60 / 24 / 365;
+        printf("{{%s}}\r\n",(years < YEARS_TO_PASS ?"failure":"success"));
+        printf("{{end}}\r\n");
     }
 
 protected:
@@ -149,9 +153,13 @@ protected:
     char _rxBuf[32];
 };
 
-int main() {
+EthernetInterface eth;
+UDPGetTime *gt;
+
+void app_start(int argc, char *argv[]) {
+    (void) argc;
+    (void) argv;
     printf("{{start}}\r\n");
-    EthernetInterface eth;
     /* Initialise with DHCP, connect, and start up the stack */
     eth.init();
     eth.connect();
@@ -160,23 +168,7 @@ int main() {
     printf("UDP client IP Address is %s\r\n", eth.getIPAddress());
 
     /* Get the current time */
-    UDPGetTime gt;
-
-    {
-        FunctionPointer1<void, const char*> fp(&gt, &UDPGetTime::startGetTime);
-        minar::Scheduler::postCallback(fp.bind(HTTP_SERVER_NAME));
-    }
-
-    minar::Scheduler::start();
-
-    printf("UDP: %lu seconds since 01/01/1900 00:00 GMT\r\n", gt.time());
-
-    eth.disconnect();
-
-    float years = (float) gt.time() / 60 / 60 / 24 / 365;
-
-    printf("{{%s}}\r\n",(years < YEARS_TO_PASS ?"failure":"success"));
-    printf("{{end}}\r\n");
-
-    return 0;
+    gt = new UDPGetTime();
+    FunctionPointer1<void, const char*> fp(gt, &UDPGetTime::startGetTime);
+    minar::Scheduler::postCallback(fp.bind(HTTP_SERVER_NAME));
 }

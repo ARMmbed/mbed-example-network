@@ -62,28 +62,29 @@ if __name__ == '__main__':
         print '[FAIL]'
  */
 
-int main (void) {
-    EthernetInterface eth;
+EthernetInterface eth;
+UDPSocket *udpserver;
+
+void app_start (int argc, char *argv[]) {
+    (void) argc;
+    (void) argv;
     eth.init(); //Use DHCP
     eth.connect();
 
     socket_error_t err = lwipv4_socket_init();
     if (err) {
         printf("MBED: Failed to initialize socket stack (%d)\r\n", err);
-        return 1;
+        return;
     }
-    UDPSocket udpserver(SOCKET_STACK_LWIP_IPV4);
+    udpserver = new UDPSocket(SOCKET_STACK_LWIP_IPV4);
 
     printf("MBED: UDP Server IP Address is %s:%d\r\n", eth.getIPAddress(), ECHO_SERVER_PORT);
 
-    udpserver.setOnError(UDPSocket::ErrorHandler_t(onError));
-    udpserver.open(SOCKET_AF_INET4);
-    err = udpserver.bind("0.0.0.0",ECHO_SERVER_PORT);
-    udpserver.error_check(err);
-    udpserver.setOnReadable(UDPSocket::ReadableHandler_t(onRx));
+    udpserver->setOnError(UDPSocket::ErrorHandler_t(onError));
+    udpserver->open(SOCKET_AF_INET4);
+    err = udpserver->bind("0.0.0.0",ECHO_SERVER_PORT);
+    udpserver->error_check(err);
+    udpserver->setOnReadable(UDPSocket::ReadableHandler_t(onRx));
 
     printf("MBED: Waiting for packet...\r\n");
-    minar::Scheduler::start();
-    return 1;
-
 }
