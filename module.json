@@ -17,8 +17,8 @@
   ],
   "extraIncludes": [],
   "dependencies": {
-    "mbed-drivers": "~0.2.5",
-    "sockets": "~0.2.0"
+    "mbed-drivers": "~0.6.3",
+    "sockets": "~0.3.0"
   },
   "targetDependencies": {},
   "scripts": {

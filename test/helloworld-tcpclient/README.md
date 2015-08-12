@@ -23,8 +23,8 @@ To build and run this example the following requirements are necessary:
 
 ## Known Issues
 There are two known issues with this example:
-* Dangling connections. If a connection is left unterminated, such as if the target mbed-enabled board is reset before it completes the example, the server will recognize the new connection as a repeated packet from the old connection and ignore it.  This is caused by the TCP quad (src IP/port, dest IP/port) being identical.
-* Ignored new connections. A server may recognize a repeated connection as a retransmission even after a completed TCP close. This occurs when the example has run successfully one time, then is run again by resetting the target mbed-enabled board. This is caused by the TCP quad (src IP/port, dest IP/port) being identical.
+* Dangling connections. If a connection is left unterminated, such as if the target mbed-enabled board is reset before it completes the example, the server will recognize the new connection as a repeated packet from the old connection and ignore it.  This is caused by the TCP quad (src IP/port, dest IP/port) and sequence number being identical.
+* Ignored new connections. A server may recognize a repeated connection as a retransmission even after a completed TCP close. This occurs when the example has run successfully one time, then is run again by resetting the target mbed-enabled board. This is caused by the TCP quad (src IP/port, dest IP/port) and sequence number being identical.
 
 It is possible to work around this problem by changing the source port number using bind.
 
