@@ -34,35 +34,27 @@ It is possible to work around this problem by changing the source port number us
 
 2. Connect the FRDM-K64F to the computer with the micro-USB cable, being careful to use the micro-USB port labeled "OpenSDA".
 
-4. Navigate to the root mbed-example-network directory that came with your release and open a terminal.
+3. Navigate to the root mbed-example-network directory that came with your release and open a terminal.
 
-5. Set the yotta target:
+4. Set the yotta target:
 
 	```
 	yotta target frdm-k64f-gcc
 	```
 
-6. Check that there are no missing dependencies:
-
-    ```
-    $ yt ls
-    ```
-
-	If there are, yotta will list them in the terminal. Please install them before proceeding.
-
-7. Build the examples. This will take a long time if it is the first time that the examples have been built:
+5. Build the examples. This will take a long time if it is the first time that the examples have been built:
 
     ```
     $ yt build
     ```
 
-8. Copy `build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-tcpclient.bin` to your mbed board and wait until the LED next to the USB port stops blinking.
+6. Copy `build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-tcpclient.bin` to your mbed board and wait until the LED next to the USB port stops blinking.
 
-9. Start the serial terminal emulator and connect to the virtual serial port presented by FRDM-K64F. For settings, use 9600 baud, 8N1, no flow control.
+7. Start the serial terminal emulator and connect to the virtual serial port presented by FRDM-K64F. For settings, use 9600 baud, 8N1, no flow control.
 
-10. Press the reset button on the board.
+8. Press the reset button on the board.
 
-11. The output in the terminal window should look like:
+9. The output in the terminal window should look like:
 
     ```
     TCP client IP Address is 192.168.2.2
