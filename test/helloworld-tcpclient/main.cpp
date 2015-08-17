@@ -32,7 +32,7 @@
 #include "lwipv4_init.h"
 
 namespace {
-const char *HTTP_SERVER_NAME = "mbed.org";
+const char *HTTP_SERVER_NAME = "www.mbed.org";
 const int HTTP_SERVER_PORT = 80;
 const int RECV_BUFFER_SIZE = 600;
 
