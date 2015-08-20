@@ -43,7 +43,7 @@ To build and run this example the following requirements are necessary:
 
 6. Copy `build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-udpclient.bin` to your mbed board and wait until the LED next to the USB port stops blinking.
 
-7. Start the serial terminal emulator and connect to the virtual serial port presented by FRDM-K64F. For settings, use 9600 baud, 8N1, no flow control.
+9. Start the serial terminal emulator and connect to the virtual serial port presented by FRDM-K64F. For settings, use 115200 baud, 8N1, no flow control.
 
 8. Press the reset button on the board.
 
