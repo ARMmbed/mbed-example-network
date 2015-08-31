@@ -38,7 +38,7 @@ To build and run this example the following requirements are necessary:
 5. Build the examples. This will take a long time if it is the first time that the examples have been built:
 
     ```
-    $ yt build
+    $ yotta build
     ```
 
 6. Copy `build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-udpclient.bin` to your mbed board and wait until the LED next to the USB port stops blinking.
