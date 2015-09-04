@@ -2,7 +2,6 @@
   "name": "mbed-example-network",
   "version": "0.1.6",
   "description": "Asynch Network Examples",
-  "private": true,
   "keywords": [
     "mbed",
     "network",
