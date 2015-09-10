@@ -32,11 +32,11 @@
 #include "lwipv4_init.h"
 
 namespace {
-const char *HTTP_SERVER_NAME = "www.mbed.org";
+const char *HTTP_SERVER_NAME = "developer.mbed.org";
 const int HTTP_SERVER_PORT = 80;
 const int RECV_BUFFER_SIZE = 600;
 
-const char HTTP_PATH[] = "/assets/uploads/hello.txt";
+const char HTTP_PATH[] = "/media/uploads/mbed_official/hello.txt";
 const size_t HTTP_PATH_LEN = sizeof(HTTP_PATH) - 1;
 
 /* Test related data */
