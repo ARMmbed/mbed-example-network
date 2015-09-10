@@ -1,6 +1,6 @@
 # HTTP File Downloader (TCP Example)
 
-This application downloads a file from an HTTP server (mbed.org) and looks for a specific string in that file.
+This application downloads a file from an HTTP server (developer.mbed.org) and looks for a specific string in that file.
 
 This example is implemented as a logic class (HelloHTTP) wrapping a TCP socket. The logic class handles all events, leaving the main loop to just check if the process has finished.
 
