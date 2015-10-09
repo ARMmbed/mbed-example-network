@@ -28,6 +28,7 @@
 #include "mbed-net-sockets/UDPSocket.h"
 #include "test_env.h"
 #include "minar/minar.h"
+#include "core-util/FunctionPointer.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -171,6 +172,6 @@ void app_start(int argc, char *argv[]) {
 
     /* Get the current time */
     gt = new UDPGetTime();
-    FunctionPointer1<void, const char*> fp(gt, &UDPGetTime::startGetTime);
+    mbed::util::FunctionPointer1<void, const char*> fp(gt, &UDPGetTime::startGetTime);
     minar::Scheduler::postCallback(fp.bind(HTTP_SERVER_NAME));
 }
