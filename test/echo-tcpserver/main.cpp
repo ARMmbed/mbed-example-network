@@ -31,6 +31,7 @@
 #include "Timer.h"
 #include "mbed-net-lwip/lwipv4_init.h"
 #include "minar/minar.h"
+#include "core-util/FunctionPointer.h"
 
 namespace {
     const int ECHO_SERVER_PORT = 7;
@@ -138,6 +139,6 @@ void app_start(int argc, char *argv[]) {
     eth.connect();
     lwipv4_socket_init();
     printf("MBED: Server IP Address is %s:%d\r\n", eth.getIPAddress(), ECHO_SERVER_PORT);
-    mbed::FunctionPointer1<void, uint16_t> fp(&server, &TCPEchoServer::start);
+    mbed::util::FunctionPointer1<void, uint16_t> fp(&server, &TCPEchoServer::start);
     minar::Scheduler::postCallback(fp.bind(ECHO_SERVER_PORT));
 }
