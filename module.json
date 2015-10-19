@@ -5,7 +5,8 @@
   "keywords": [
     "mbed",
     "network",
-    "sockets"
+    "sockets",
+    "mbed-official"
   ],
   "author": "brendan.moran@arm.com",
   "licenses": [
@@ -16,8 +17,8 @@
   ],
   "extraIncludes": [],
   "dependencies": {
-    "mbed-drivers": "~0.10.0",
-    "sockets": "~0.6.0"
+    "mbed-drivers": "~0.11.0",
+    "sockets": "^1.0.0"
   },
   "targetDependencies": {},
   "scripts": {
