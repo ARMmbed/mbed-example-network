@@ -24,12 +24,12 @@
  *  This example is implemented as a logic class (TCPEchoServer) wrapping a TCP server socket.
  *  The logic class handles all events, leaving the main loop to just check for disconnected sockets.
  */
-#include "mbed.h"
-#include "EthernetInterface.h"
-#include "mbed-net-sockets/TCPListener.h"
-#include "mbed-net-socket-abstract/socket_api.h"
-#include "Timer.h"
-#include "mbed-net-lwip/lwipv4_init.h"
+#include "mbed-drivers/mbed.h"
+#include "sal-iface-eth/EthernetInterface.h"
+#include "sockets/TCPListener.h"
+#include "sal/socket_api.h"
+#include "mbed-drivers/Timer.h"
+#include "sal-stack-lwip/lwipv4_init.h"
 #include "minar/minar.h"
 #include "core-util/FunctionPointer.h"
 

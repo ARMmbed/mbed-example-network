@@ -23,10 +23,10 @@
  *  The logic class handles all events, leaving the main loop to just check if the process
  *  has finished.
  */
-#include "mbed.h"
+#include "mbed-drivers/mbed.h"
 #include "EthernetInterface.h"
-#include "mbed-net-sockets/UDPSocket.h"
-#include "test_env.h"
+#include "sockets/UDPSocket.h"
+#include "mbed-drivers/test_env.h"
 #include "minar/minar.h"
 #include "core-util/FunctionPointer.h"
 
@@ -35,7 +35,7 @@
 #include <string.h>
 
 /* TODO: Remove when yotta supports init. */
-#include "lwipv4_init.h"
+#include "sal-stack-lwip/lwipv4_init.h"
 
 #define UDP_TIME_PORT 37
 
