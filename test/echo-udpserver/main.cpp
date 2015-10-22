@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "mbed.h"
-#include "EthernetInterface.h"
-#include "mbed-net-sockets/UDPSocket.h"
-#include "mbed-net-lwip/lwipv4_init.h"
-#include "mbed-net-socket-abstract/socket_api.h"
+#include "mbed-drivers/mbed.h"
+#include "sal-iface-eth/EthernetInterface.h"
+#include "sockets/UDPSocket.h"
+#include "sal-stack-lwip/lwipv4_init.h"
+#include "sal/socket_api.h"
 #include "minar/minar.h"
 
 namespace {

@@ -23,12 +23,13 @@
  *  The logic class handles all events, leaving the main loop to just check if the process
  *  has finished.
  */
-#include "mbed.h"
-#include "EthernetInterface.h"
-#include "mbed-net-sockets/TCPStream.h"
-#include "test_env.h"
+#include "mbed-drivers/mbed.h"
+#include "sal-iface-eth/EthernetInterface.h"
+#include "sockets/TCPStream.h"
+#include "mbed-drivers/test_env.h"
 #include "minar/minar.h"
-#include "lwipv4_init.h"
+
+#include "sal-stack-lwip/lwipv4_init.h"
 #include "core-util/FunctionPointer.h"
 
 namespace {
