@@ -91,12 +91,23 @@ public:
      */
     uint32_t time() { return _time;}
 protected:
+    void sendTimeQuery(Socket* s) {
+        char buf[32];
+        _resolvedAddr.fmtIPv4(buf, 32);
+        /* Send the query packet to the remote host */
+        printf("Sending \"time\" to %s:%d\r\n", buf, (int)_udpTimePort);
+        socket_error_t err = s->send_to("time",strlen("time"), &_resolvedAddr, _udpTimePort);
+        /* A failure on send is a fatal error in this example */
+        if (err != SOCKET_ERROR_NONE) {
+            printf("Socket Error %d\r\n", err);
+            notify_completion(false);
+        }
+    }
     /**
      * The DNS Response Handler
      * @param[in] arg (unused)
      */
     void onDNS(Socket *s, struct socket_addr sa, const char *domain) {
-        (void) s;
         char buf[32];
         printf("DNS Response Received:\r\n");
         /* Extract the Socket event to read the resolved address */
@@ -105,15 +116,11 @@ protected:
         printf("%s = %s\r\n", domain, buf);
 
         /* Register the read handler */
-        sock.setOnReadable(Socket::ReadableHandler_t(this, &UDPGetTime::onRecv));
-        /* Send the query packet to the remote host */
-        printf("Sending \"time\" to %s:%d\r\n", buf, (int)_udpTimePort);
-        socket_error_t err = sock.send_to("time",strlen("time"), &_resolvedAddr, _udpTimePort);
-        /* A failure on send is a fatal error in this example */
-        if (err != SOCKET_ERROR_NONE) {
-            printf("Socket Error %d\r\n", err);
-            notify_completion(false);
-        }
+        s->setOnReadable(Socket::ReadableHandler_t(this, &UDPGetTime::onRecv));
+        sendTimeQuery(s);
+        // Schedule a retry function
+        mbed::util::FunctionPointer1<void, Socket*> fp(this, &UDPGetTime::sendTimeQuery);
+        _retryHandle = minar::Scheduler::postCallback(fp.bind(s)).period(minar::milliseconds(1000)).getHandle();
     }
     /**
      * The Time Query response handler
@@ -121,6 +128,7 @@ protected:
      */
     void onRecv(Socket *s) {
         (void) s;
+        minar::Scheduler::cancelCallback(_retryHandle);
         printf("Data Available!\r\n");
         /* Initialize the buffer size */
         size_t nRx = sizeof(_rxBuf);
@@ -149,6 +157,7 @@ protected:
     volatile bool resolved;
     const uint16_t _udpTimePort;
     volatile uint32_t _time;
+    minar::callback_handle_t _retryHandle;
 
 protected:
     char _rxBuf[32];
