@@ -130,15 +130,18 @@ protected:
     char buffer[BUFFER_SIZE];
 };
 EthernetInterface eth;
-TCPEchoServer server;
+TCPEchoServer* pServer;
 
 void app_start(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
+    static Serial pc(USBTX, USBRX);
+    pc.baud(115200);
     eth.init(); //Use DHCP
     eth.connect();
     lwipv4_socket_init();
     printf("MBED: Server IP Address is %s:%d\r\n", eth.getIPAddress(), ECHO_SERVER_PORT);
-    mbed::util::FunctionPointer1<void, uint16_t> fp(&server, &TCPEchoServer::start);
+    pServer = new TCPEchoServer;
+    mbed::util::FunctionPointer1<void, uint16_t> fp(pServer, &TCPEchoServer::start);
     minar::Scheduler::postCallback(fp.bind(ECHO_SERVER_PORT));
 }
