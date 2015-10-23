@@ -9,12 +9,12 @@ This example is implemented as a logic class (UDPGetTime) wrapping a UDP socket.
 To build and run this example the following requirements are necessary:
 
 * A computer with the following software installed:
-	* [CMake](http://www.cmake.org/download/).
-	* [yotta](https://github.com/ARMmbed/yotta). Please note that **yotta has its own set of dependencies**, listed in the [installation instructions](http://armmbed.github.io/yotta/#installing-on-windows).
-	* [Python](https://www.python.org/downloads/).
-	* [ARM GCC toolchain](https://launchpad.net/gcc-arm-embedded).
-	* A serial terminal emulator (e.g. screen, pySerial, cu).
-	* Optionally, for debugging, pyOCD (can be installed using Python's [pip](https://pypi.python.org/pypi/pip)). 
+    * [CMake](http://www.cmake.org/download/).
+    * [yotta](https://github.com/ARMmbed/yotta). Please note that **yotta has its own set of dependencies**, listed in the [installation instructions](http://armmbed.github.io/yotta/#installing-on-windows).
+    * [Python](https://www.python.org/downloads/).
+    * [ARM GCC toolchain](https://launchpad.net/gcc-arm-embedded).
+    * A serial terminal emulator (e.g. screen, pySerial, cu).
+    * Optionally, for debugging, pyOCD (can be installed using Python's [pip](https://pypi.python.org/pypi/pip)).
 * An FRDM-K64F development board.
 * An Ethernet connection to the internet.
 * An Ethernet cable.
@@ -30,10 +30,10 @@ To build and run this example the following requirements are necessary:
 3. Navigate to the root mbed-example-network directory that came with your release and open a terminal.
 
 4. Set the yotta target:
-	
-	```
-	yotta target frdm-k64f-gcc
-	```
+
+    ```
+    yotta target frdm-k64f-gcc
+    ```
 
 5. Build the examples. This will take a long time if it is the first time that the examples have been built:
 
@@ -56,38 +56,49 @@ To build and run this example the following requirements are necessary:
 
 ## Using a debugger
 
-Optionally, connect using a debugger to set breakpoints and follow program flow. Proceed normally up to and including step 6 (building the example), then:
+Optionally, connect using a debugger to set breakpoints and follow program flow. Proceed normally up to and including step 5 (building the example), then:
 
-1. Open a new terminal window, then start the pyOCD GDB server.
-
-    ```
-    $ python pyOCD/test/gdb_server.py
-    ```
+1. yotta debug mbed-example-network-test-helloworld-udpclient
 
     The output should look like this:
 
     ```
-    Welcome to the PyOCD GDB Server Beta Version
-    INFO:root:new board id detected: 02400201B1130E4E4CXXXXXX
-    id => usbinfo | boardname
-    0 => MB MBED CM (0xd28, 0x204) [k64f]
-    INFO:root:DAP SWD MODE initialised
-    INFO:root:IDCODE: 0x2BA01477
-    INFO:root:K64F not in secure state
-    INFO:root:6 hardware breakpoints, 4 literal comparators
-    INFO:root:4 hardware watchpoints
-    INFO:root:CPU core is Cortex-M4
-    INFO:root:FPU present
-    INFO:root:GDB server started at port:3333
+    info: found mbed-example-network-test-helloworld-udpclient at test/mbed-example-network-test-helloworld-udpclient
+    info: preparing PyOCD gdbserver...
+    info: finding connected board...
+    info: new board id detected: ...
+    info: board allows 5 concurrent packets
+    info: DAP SWD MODE initialised
+    info: IDCODE: ...
+    info: K64F not in secure state
+    info: 6 hardware breakpoints, 4 literal comparators
+    info: CPU core is Cortex-M4
+    info: FPU present
+    info: 4 hardware watchpoints
+    info: starting PyOCD gdbserver...
+    info: Telnet: server started on port 4444
+    info: GDB server started at port:3333
+    GNU gdb (GNU Tools for ARM Embedded Processors) 7.6.0.20131129-cvs
+    Copyright (C) 2013 Free Software Foundation, Inc.
+    License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+    This is free software: you are free to change and redistribute it.
+    There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+    and "show warranty" for details.
+    This GDB was configured as "--target=arm-none-eabi".
+    For bug reporting instructions, please see:
+    <http://www.gnu.org/software/gdb/bugs/>...
+    Reading symbols from <path to firmware image>...done.
+    info: One client connected!
+    (gdb)
     ```
 
-2. Open a new terminal window, go to the root directory of your copy of mbed-network-examples, then start GDB and connect to the GDB server.
+2. Start a terminal emulator and connect to the virtual serial port presented by the FRDM-K64F at 115200, 8N1.
+
+3. Load the program
 
     ```
-    $ arm-none-eabi-gdb -ex "target remote localhost:3333" -ex load ./build/frdm-k64f-gcc/test/mbed-example-network-test-helloworld-udpclient
+    (gdb) load
     ```
-
-3. In a third terminal window, start the serial terminal emulator and connect to the virtual serial port presented by FRDM-K64F.
 
 4. Once the program has loaded, start it.
 
@@ -95,4 +106,4 @@ Optionally, connect using a debugger to set breakpoints and follow program flow.
     (gdb) c
     ```
 
-5. The output in the terminal window should look like in step 10 above (the final step of the regular run).
+5. The output in the serial terminal window should look like in step 9 above (the final step of the regular run).
