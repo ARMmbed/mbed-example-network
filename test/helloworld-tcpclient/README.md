@@ -9,17 +9,24 @@ This example is implemented as a logic class (HelloHTTP) wrapping a TCP socket. 
 To build and run this example the following requirements are necessary:
 
 * A computer with the following software installed:
-	* [CMake](http://www.cmake.org/download/).
-	* [yotta](https://github.com/ARMmbed/yotta). Please note that **yotta has its own set of dependencies**, listed in the [installation instructions](http://armmbed.github.io/yotta/#installing-on-windows).
-	* [Python](https://www.python.org/downloads/).
-	* [ARM GCC toolchain](https://launchpad.net/gcc-arm-embedded).
-	* A serial terminal emulator (e.g. screen, pySerial, cu).
-	* Optionally, for debugging, pyOCD (can be installed using Python's [pip](https://pypi.python.org/pypi/pip)).
+    * [yotta](https://github.com/ARMmbed/yotta). Please note that **yotta has its own set of dependencies**, listed in the installation instructions
+        * [Windows](http://yottadocs.mbed.com/#installing-on-windows)
+        * [Linux](http://yottadocs.mbed.com/#installing-on-osx)
+        * [Mac OS X](http://yottadocs.mbed.com/#installing-on-linux)
+    * Note that pyOCD is installed automatically when installing yotta
+    * Keil or [ARM GCC toolchain](https://launchpad.net/gcc-arm-embedded)
+    * A serial terminal emulator (e.g. screen, pySerial, cu).
 * An FRDM-K64F development board.
 * An Ethernet connection to the internet.
 * An Ethernet cable.
 * A micro-USB cable.
 * If your OS is Windows, please follow the installation instructions [for the serial port driver](https://developer.mbed.org/handbook/Windows-serial-configuration).
+
+Note: To discover the serial port used by the connected mbed-enabled board, either use [mbed-ls](https://github.com/ARMmbed/mbed-ls), or use your OS's built-in mechanism for port discovery:
+
+* On Windows, open Device Manager, and look at the list of ports to determine which one matches your mbed-enabled device
+* On Linux, the virtual com port will appear as ```/dev/ttyACM*```
+* On Mac OS X, the virtual com port will appear as ```/dev/tty.usbmodem*```
 
 ## Known Issues
 There are two known issues with this example:
