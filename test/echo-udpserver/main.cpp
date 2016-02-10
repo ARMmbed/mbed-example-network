@@ -84,6 +84,7 @@ UDPSocket *udpserver;
 void app_start (int argc, char *argv[]) {
     (void) argc;
     (void) argv;
+    get_stdio_serial().baud(115200);
     eth.init(); //Use DHCP
     eth.connect();
 

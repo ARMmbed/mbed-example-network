@@ -168,8 +168,7 @@ UDPGetTime *gt;
 void app_start(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
-    static Serial pc(USBTX, USBRX);
-    pc.baud(115200);
+    get_stdio_serial().baud(115200);
 
     printf("{{start}}\r\n");
     /* Initialise with DHCP, connect, and start up the stack */

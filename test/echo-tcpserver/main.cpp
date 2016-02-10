@@ -135,8 +135,7 @@ TCPEchoServer* pServer;
 void app_start(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
-    static Serial pc(USBTX, USBRX);
-    pc.baud(115200);
+    get_stdio_serial().baud(115200);
     eth.init(); //Use DHCP
     eth.connect();
     lwipv4_socket_init();
