@@ -26,7 +26,7 @@
 #include "mbed-drivers/mbed.h"
 #include "EthernetInterface.h"
 #include "sockets/UDPSocket.h"
-#include "mbed-drivers/test_env.h"
+#include "greentea-client/test_env.h"
 #include "minar/minar.h"
 #include "core-util/FunctionPointer.h"
 
@@ -100,7 +100,7 @@ protected:
         /* A failure on send is a fatal error in this example */
         if (err != SOCKET_ERROR_NONE) {
             printf("Socket Error %d\r\n", err);
-            notify_completion(false);
+            GREENTEA_TESTSUITE_RESULT(false);
         }
     }
     /**
@@ -137,7 +137,7 @@ protected:
         /* A failure on recv is a fatal error in this example */
         if (err != SOCKET_ERROR_NONE) {
             printf("Socket Error %d\r\n", err);
-            notify_completion(false);
+            GREENTEA_TESTSUITE_RESULT(false);
         }
         uint32_t time;
         /* Correct for possible non 32-bit alignment */

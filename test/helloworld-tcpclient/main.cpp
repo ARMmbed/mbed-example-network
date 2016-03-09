@@ -26,7 +26,7 @@
 #include "mbed-drivers/mbed.h"
 #include "sal-iface-eth/EthernetInterface.h"
 #include "sockets/TCPStream.h"
-#include "mbed-drivers/test_env.h"
+#include "greentea-client/test_env.h"
 #include "minar/minar.h"
 
 #include "sal-stack-lwip/lwipv4_init.h"
