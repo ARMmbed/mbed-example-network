@@ -57,8 +57,13 @@ Note: To discover the serial port used by the connected mbed-enabled board, eith
 9. The output in the terminal window should look like:
 
     ```
-    UDP client IP Address is 192.168.2.2
-    UDP: 3635245075 seconds since 01/01/1900 00:00 GMT
+    UDP client IP Address is 10.2.202.44
+    Starting DNS Query for utcnist.colorado.edu
+    DNS Response Received:
+    utcnist.colorado.edu = 128.138.140.44
+    Sending "time" to 128.138.140.44:37
+    Data Available!
+    UDP: 3666511712 seconds since 01/01/1900 00:00 GMT
     ```
 
 ## Using a debugger
