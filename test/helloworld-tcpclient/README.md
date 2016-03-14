@@ -64,30 +64,34 @@ It is possible to work around this problem by changing the source port number us
 9. The output in the terminal window should look like:
 
     ```
-    TCP client IP Address is 192.168.2.2
-    Connecting to developer.mbed.org:80
-    HTTP: Received 552 chars from server
+    TCP client IP Address is 10.2.202.44
+    Starting DNS lookup for developer.mbed.org
+    DNS Response Received:
+    developer.mbed.org: 217.140.101.30
+    Connecting to 217.140.101.30:80
+    Connected to 217.140.101.30:80
+    Sending HTTP Get Request...
+    HTTP Response received.
+    HTTP: Received 473 chars from server
     HTTP: Received 200 OK status ... [OK]
     HTTP: Received 'Hello world!' status ... [OK]
     HTTP: Received message:
-
     HTTP/1.1 200 OK
-    Server: nginx/1.4.6 (Ubuntu)
-    Date: Fri, 13 Mar 2015 14:17:36 GMT
+    Server: nginx/1.7.10
+    Date: Wed, 09 Mar 2016 13:26:40 GMT
     Content-Type: text/plain
     Content-Length: 14
     Connection: keep-alive
-    Set-Cookie: route=4f2fe48bfdc4a79550bab031c790587a; Path=/compiler
     Last-Modified: Fri, 27 Jul 2012 13:30:34 GMT
     Accept-Ranges: bytes
     Cache-Control: max-age=36000
-    Expires: Sat, 14 Mar 2015 00:17:36 GMT
-    X-Upstream-L3: 217.140.101.28:14101
-    X-Upstream-L2: sjc_production_router_dock0-prod-sjc
-    X-Upstream-L2-pre: 217.140.101.28:14100
-    X-Upstream-L1: primaryrouter_dock0-prod-sjc
-
-    Hello world!
+    Expires: Wed, 09 Mar 2016 23:26:40 GMT
+    X-Upstream-L3: 172.17.42.1:8080
+    X-Upstream-L2: developer-sjc-indigo-1-nginx
+    X-Upstream-L1-next-hop: 217.140.101.34:8001
+    X-Upstream-L1: developer-sjc-indigo-border-nginx
+    
+    Hello world!    
     ```
 ## Using a debugger
 
