@@ -26,11 +26,7 @@
 #include "mbed-drivers/mbed.h"
 #include "sal-iface-eth/EthernetInterface.h"
 #include "sockets/TCPStream.h"
-#include "mbed-drivers/test_env.h"
-#include "minar/minar.h"
-
 #include "sal-stack-lwip/lwipv4_init.h"
-#include "core-util/FunctionPointer.h"
 
 namespace {
 const char *HTTP_SERVER_NAME = "developer.mbed.org";

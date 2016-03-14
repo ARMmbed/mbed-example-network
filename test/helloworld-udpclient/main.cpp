@@ -27,8 +27,6 @@
 #include "EthernetInterface.h"
 #include "sockets/UDPSocket.h"
 #include "mbed-drivers/test_env.h"
-#include "minar/minar.h"
-#include "core-util/FunctionPointer.h"
 
 #include <stddef.h>
 #include <stdint.h>

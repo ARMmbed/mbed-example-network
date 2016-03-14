@@ -28,10 +28,7 @@
 #include "sal-iface-eth/EthernetInterface.h"
 #include "sockets/TCPListener.h"
 #include "sal/socket_api.h"
-#include "mbed-drivers/Timer.h"
 #include "sal-stack-lwip/lwipv4_init.h"
-#include "minar/minar.h"
-#include "core-util/FunctionPointer.h"
 
 namespace {
     const int ECHO_SERVER_PORT = 7;

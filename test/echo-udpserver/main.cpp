@@ -19,7 +19,6 @@
 #include "sockets/UDPSocket.h"
 #include "sal-stack-lwip/lwipv4_init.h"
 #include "sal/socket_api.h"
-#include "minar/minar.h"
 
 namespace {
     const int ECHO_SERVER_PORT = 7;
